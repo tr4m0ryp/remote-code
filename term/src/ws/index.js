@@ -32,4 +32,4 @@ function install(server) {
   return wss;
 }
 
-module.exports = { install, broadcast: control.broadcast, current: control.current, killAll: pty.killAll, guard };
+module.exports = { install, broadcast: control.broadcast, current: control.current, killAll: pty.killAll, loadPty: pty.loadPty, guard };

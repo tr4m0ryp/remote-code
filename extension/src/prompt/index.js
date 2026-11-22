@@ -15,11 +15,14 @@ async function sendPrompt(pane, text) {
   await runInput("tmux", ["send-keys", "-t", pane, "Enter"], "");
 }
 
-// Last visible lines of the pane plus a busy flag (Claude shows "esc to interrupt" while working).
+// Last visible lines of the pane plus a busy flag: Claude shows "esc to interrupt" while working, and
+// "Waiting for N background agents to finish" while its subagents run.
+const BUSY = /esc to interrupt|waiting for \d+ background (?:agents?|tasks?)/i;
+
 async function paneStatus(pane) {
   const out = await run("tmux", ["capture-pane", "-p", "-J", "-t", pane, "-S", "-40"]);
   const lines = out.replace(/\s+$/, "").split("\n");
-  return { busy: /esc to interrupt/i.test(lines.slice(-12).join("\n")), tail: lines.slice(-14).join("\n") };
+  return { busy: BUSY.test(lines.slice(-12).join("\n")), tail: lines.slice(-14).join("\n") };
 }
 
 module.exports = { sendPrompt, paneStatus };

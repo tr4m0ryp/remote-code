@@ -5,8 +5,8 @@ const web = require("./http");
 const ws = require("./ws");
 
 function main() {
-  web.buildAssets(); // fail fast on a missing vendor file
-  ws.killAll; // pty module is loaded lazily on the first attach
+  web.buildAssets(); // fail fast on a missing vendor file or node-pty
+  ws.loadPty();
   const server = http.createServer(web.handler);
   ws.install(server);
   server.listen(config.port, config.host, () => {
