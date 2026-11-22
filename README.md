@@ -14,7 +14,7 @@ remote-code fixes that. Host it on a `code.*` subdomain of your instance and eve
 - **Remote Sessions extension**: a sidebar listing every running Claude Code session, grouped by project, with branch and changed-file count.
 - **Live workspace**: each project with a running session is kept open as a workspace folder automatically. A session starts, its project appears; it ends, the project leaves.
 - **Prompt a session**: a "Claude Sessions" panel under the Explorer shows the sessions working in the project you have open, their live status and last output, and a prompt box. The prompt is typed into that session's own terminal, so it runs through your Claude harness with its hooks and skills, never through a VS Code assistant.
-- **Watch**: open a read-only terminal on a session's tmux pane to follow the agent live.
+- **Terminal windows**: open any session as a floating, macOS-style terminal window over the whole editor (click a session, or "Open terminal" on its card). Several can be open side by side, snapped to screen halves or tiled, and minimised to a dock at the bottom; they come back after a reload.
 - **Stripped editor**: VS Code's built-in AI chat, Copilot, cloud sign-in, debuggers, task runners and surplus themes are deleted from the install. What remains is an editor and the sessions.
 
 ## Install
