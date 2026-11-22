@@ -1,8 +1,9 @@
-// Client for the remote-term service (term/ in this repo): asks every open editor page to show a
-// session as a floating terminal window over the workbench.
+// Client for the remote-term service (term/ in this repo): asks the open editor page to show (or
+// restore) a session as a floating terminal window, and reads which windows are minimised.
 const vscode = require("vscode");
 
-const OPEN_URL = "http://127.0.0.1:8796/term/api/open";
+const BASE = "http://127.0.0.1:8796/term/api";
+const OPEN_URL = BASE + "/open";
 
 async function openTerminal(tmux) {
   if (!tmux) return;
@@ -22,4 +23,15 @@ async function openTerminal(tmux) {
   }
 }
 
-module.exports = { openTerminal };
+// Map<tmux, { min }> of session windows open in editor pages; empty when the service is down.
+async function windowStates() {
+  try {
+    const res = await fetch(BASE + "/windows", { signal: AbortSignal.timeout(1500) });
+    const body = await res.json();
+    return new Map((body.windows || []).map((w) => [w.tmux, { min: Boolean(w.min) }]));
+  } catch {
+    return new Map();
+  }
+}
+
+module.exports = { openTerminal, windowStates };

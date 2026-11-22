@@ -1,13 +1,14 @@
 // "Sessions" panel: one compact row per Claude session working in the project of the active file,
 // with a state (working, idle, sleeping after 30 min without activity). Display only: clicking a row
-// opens its floating terminal window (remote-term), and "New session" launches one in this project.
+// opens its floating terminal window, or restores it when minimised (marked in the row), and "New
+// session" launches one in this project.
 // Nothing is ever typed into a session from here.
 const crypto = require("crypto");
 const path = require("path");
 const vscode = require("vscode");
 const { render } = require("./html");
 const { paneStatus } = require("../../discovery");
-const { openTerminal } = require("../../term");
+const { openTerminal, windowStates } = require("../../term");
 
 const STATUS_MS = 3000;
 const SLEEP_MS = 30 * 60 * 1000;
@@ -85,6 +86,7 @@ class SessionsView {
     const p = this.project;
     if (!this.view || !this.view.visible || !p) return;
     const now = Date.now();
+    const wins = await windowStates();
     for (const s of p.sessions.filter((x) => x.pane)) {
       const st = await paneStatus(s.pane);
       // Last activity: the last poll that saw Claude working, seeded from tmux's window activity.
@@ -92,7 +94,9 @@ class SessionsView {
       else if (!this.lastBusy.has(s.pane)) this.lastBusy.set(s.pane, st.activity || now);
       const lastActive = this.lastBusy.get(s.pane);
       const state = st.busy ? "working" : now - lastActive > SLEEP_MS ? "sleeping" : "idle";
-      if (this.view) this.view.webview.postMessage({ type: "status", pane: s.pane, state, lastActive });
+      const w = wins.get(s.tmux);
+      const window = w ? (w.min ? "minimised" : "open") : null;
+      if (this.view) this.view.webview.postMessage({ type: "status", pane: s.pane, state, lastActive, window });
     }
   }
 
