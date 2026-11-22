@@ -15,7 +15,10 @@ Claude remote-control sessions on this host are working in.
   `code.husimi.ai/term/*` to it behind the same SSO). Serves the floating terminal overlay that
   `install.sh` injects into code-server's `workbench.html`; `src/` is the server (sessions, http,
   ws: control channel + one `tmux attach` per window in node-pty reused from code-server's bundle),
-  `client/` the browser overlay, concatenated into `/term/overlay.js`. Restart the unit after
+  `client/` the browser overlay, concatenated into `/term/overlay.js` (`wm/` windows, `compose/`
+  the local prompt strip and direct-mode routing, `net/` sockets). Pty protocol: binary frames both
+  ways for terminal bytes, JSON text frames for resize/scroll/prompt; compose prompts are pasted
+  server-side (`src/sessions/prompt.js`). Restart the unit after
   editing `client/`. Pty attach only for names in the live `tmux list-sessions` set; websocket
   Origin must be in `TERM_ORIGINS`. Tests: `cd term && npm test` (server tests need the unit up).
 - **math-comments/**: the `husimi.math-comments` extension, plain CommonJS; MathJax 3 (`mathjax-full`)
