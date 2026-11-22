@@ -4,7 +4,8 @@ Browser code editor at https://code.husimi.ai for viewing and editing the projec
 Claude remote-control sessions on this host are working in.
 
 - **Editor:** code-server (VS Code in the browser), user systemd unit on 127.0.0.1:8795,
-  public via Caddy `code.husimi.ai` with the same basic_auth as the nip.io dashboard.
+  public via Caddy `code.husimi.ai`, gated by the manager's SSO (`import husimi_sso`, snippet in
+  `/etc/caddy/husimi-sso.caddy` = `deploy/husimi-sso.caddy`; manager `/auth/verify`, cookie `mgr_sso`).
   Ports 8790 (manager) and 8791 (another node service) are taken.
 - **extension/**: the `husimi.remote-sessions` VS Code extension, plain CommonJS, no deps.
   `discovery/` finds `claude` processes (ps + /proc/<pid>/cwd), maps them to tmux sessions and

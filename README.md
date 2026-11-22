@@ -10,7 +10,7 @@ remote-code fixes that. Host it on a `code.*` subdomain of your instance and eve
 
 ## What it is
 
-- **code-server**: VS Code running on the instance, served in the browser behind Caddy with basic auth.
+- **code-server**: VS Code running on the instance, served in the browser behind Caddy and the shared login of the instance's manager dashboard.
 - **Remote Sessions extension**: a sidebar listing every running Claude Code session, grouped by project, with branch and changed-file count.
 - **Live workspace**: each project with a running session is kept open as a workspace folder automatically. A session starts, its project appears; it ends, the project leaves.
 - **Prompt a session**: a "Claude Sessions" panel under the Explorer shows the sessions working in the project you have open, their live status and last output, and a prompt box. The prompt is typed into that session's own terminal, so it runs through your Claude harness with its hooks and skills, never through a VS Code assistant.
@@ -25,7 +25,7 @@ Needs `code-server`, `node`, `tmux` and Caddy on the instance.
 ./deploy/install.sh   # packages the extension, installs it, starts code-server on 127.0.0.1:8795
 ```
 
-Then add the block in `deploy/code.husimi.ai.caddy` to your Caddyfile with your own domain and a `caddy hash-password` hash, and reload Caddy.
+Then add `deploy/husimi-sso.caddy` and the site block in `deploy/code.husimi.ai.caddy` to your Caddyfile with your own domain, and reload Caddy. The snippet sends every request through a `forward_auth` check (`GET /auth/verify`) on your login service, which redirects to its login page when there is no session. Any other hosted project gets the same login with `import husimi_sso`.
 
 ## License
 
