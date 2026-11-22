@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds the Remote Sessions extension, installs it into code-server, and (re)starts code-server
 # on the live multi-root workspace that the extension keeps in sync with running Claude sessions.
+# Also installs remote-term (term/), the floating terminal overlay service, and injects its overlay.
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"
 data="$HOME/.local/share/code-server"
@@ -66,6 +67,15 @@ sed -i -E \
   -e 's/updateStatusBar\(\)\{!this\.environmentService\.remoteAuthority&&/updateStatusBar(){return;!this.environmentService.remoteAuthority\&\&/' \
   "$wb"
 
+# Floating terminal overlay (term/): code-server's workbench page loads remote-term's stylesheet and
+# script from /term, which Caddy routes to the remote-term service. Same-origin, so the page's CSP
+# (script-src 'self', connect-src ws: wss:) already allows them. Idempotent; re-run after upgrades.
+html="$HOME/.local/lib/code-server/lib/vscode/out/vs/code/browser/workbench/workbench.html"
+grep -q '/term/overlay.js' "$html" || sed -i 's#</head>#\t\t<!-- remote-term overlay (deploy/install.sh) -->\n\t\t<link rel="stylesheet" href="/term/overlay.css">\n\t\t<script src="/term/overlay.js" defer></script>\n\t</head>#' "$html"
+(cd "$here/term" && npm ci --omit=dev --no-audit --no-fund >/dev/null)
+sed "s|/home/tr4m0ryp/projects/remote-code|$here|g" "$here/deploy/remote-term.service" \
+  > "$HOME/.config/systemd/user/remote-term.service"
+
 cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
 sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \
   > "$HOME/.config/systemd/user/code-server.service"
@@ -79,4 +89,6 @@ rm -f "/tmp/remote-sessions-$version.vsix"
 systemctl --user daemon-reload
 systemctl --user enable code-server.service >/dev/null
 systemctl --user restart code-server.service
-echo "installed remote-sessions $version; code-server restarted on $live"
+systemctl --user enable remote-term.service >/dev/null
+systemctl --user restart remote-term.service
+echo "installed remote-sessions $version; code-server restarted on $live; remote-term on 127.0.0.1:8796"
