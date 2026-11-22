@@ -18,7 +18,8 @@
     RT.dock.render();
     if (RT.menu.isOpen()) RT.menu.render();
   });
-  RT.control.on("open", (tmux) => RT.wm.open(tmux));
+  // Open requests reach every editor tab; only a visible one acts, so background tabs stay untouched.
+  RT.control.on("open", (tmux) => document.visibilityState === "visible" && RT.wm.open(tmux));
   RT.wm.restoreAll();
   RT.control.start();
   window.remoteTerm = {

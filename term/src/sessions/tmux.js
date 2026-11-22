@@ -1,5 +1,6 @@
 // tmux queries: the live session set, pane-to-session mapping, busy detection and copy-mode scroll.
-// Every target is passed as "=name" (exact match) after the caller validated it against listSessions.
+// Targets are "=name" (exact session match) after the caller validated the name against listSessions;
+// pane commands need "=name:" (that session's active pane), since "=" alone only applies to sessions.
 const { run } = require("./exec");
 
 async function listSessions() {
@@ -35,7 +36,7 @@ async function paneBusy(pane) {
 // Scrolls the session's active pane through tmux copy-mode; lines < 0 scrolls up into history.
 // copy-mode -e leaves the mode again once scrolled back to the bottom.
 async function scroll(session, lines) {
-  const target = "=" + session;
+  const target = "=" + session + ":";
   const n = String(Math.min(Math.abs(lines), 200));
   if (lines < 0) {
     await run("tmux", ["copy-mode", "-e", "-t", target]);
