@@ -3,7 +3,7 @@
   "displayName": "Remote Sessions",
   "description": "Lists the running Claude remote-control sessions on this host and keeps their projects open as workspace folders.",
   "publisher": "husimi",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "vscode": "^1.90.0"
