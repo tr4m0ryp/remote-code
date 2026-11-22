@@ -5,7 +5,7 @@ const vscode = require("vscode");
 
 const LIVE_WORKSPACE = path.join(os.homedir(), ".local/share/code-server/live.code-workspace");
 
-function register(context, { refresh }) {
+function register(context, { refresh, onReveal }) {
   const projectOf = (el) => (el && el.project) || null;
   const reg = (id, fn) => context.subscriptions.push(vscode.commands.registerCommand(id, fn));
 
@@ -14,6 +14,7 @@ function register(context, { refresh }) {
   reg("remoteSessions.reveal", async (el) => {
     const p = projectOf(el);
     if (!p) return;
+    onReveal(p);
     const uri = vscode.Uri.file(p.root);
     if (!vscode.workspace.getWorkspaceFolder(uri)) {
       vscode.window.showInformationMessage(`${p.label} is not in this workspace. Use "Open Project Alone" or the live workspace.`);
