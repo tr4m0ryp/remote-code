@@ -3,6 +3,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 const client = require("../../client");
 
 const mods = path.join(__dirname, "../../node_modules");
@@ -37,7 +38,8 @@ function bundleCss() {
 
 function entry(body, type) {
   const buf = Buffer.from(body);
-  return { buf, type, etag: '"' + crypto.createHash("sha1").update(buf).digest("base64url") + '"' };
+  const gz = zlib.gzipSync(buf, { level: 9 });
+  return { buf, gz, type, etag: '"' + crypto.createHash("sha1").update(buf).digest("base64url") + '"' };
 }
 
 // Built once per process: restart the service after editing client/.
@@ -60,10 +62,14 @@ function serve(req, res, pathname) {
     "Content-Type": a.type + "; charset=utf-8",
     "Cache-Control": "no-cache",
     ETag: a.etag,
+    Vary: "Accept-Encoding",
     "X-Content-Type-Options": "nosniff",
   };
-  if (req.headers["if-none-match"] === a.etag) res.writeHead(304, headers).end();
-  else res.writeHead(200, { ...headers, "Content-Length": a.buf.length }).end(req.method === "HEAD" ? undefined : a.buf);
+  if (req.headers["if-none-match"] === a.etag) return res.writeHead(304, headers).end(), true;
+  const gzip = /\bgzip\b/.test(req.headers["accept-encoding"] || "");
+  const body = gzip ? a.gz : a.buf;
+  if (gzip) headers["Content-Encoding"] = "gzip";
+  res.writeHead(200, { ...headers, "Content-Length": body.length }).end(req.method === "HEAD" ? undefined : body);
   return true;
 }
 

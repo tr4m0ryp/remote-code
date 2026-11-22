@@ -1,0 +1,14 @@
+[Unit]
+Description=remote-term: floating tmux terminal windows for code-server (http://127.0.0.1:8796/term, public at code.husimi.ai/term behind the shared SSO)
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node /home/tr4m0ryp/projects/remote-code/term/src/index.js
+Restart=on-failure
+RestartSec=3
+Environment=PATH=/home/tr4m0ryp/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=TERM_PORT=8796
+Environment=TERM_ORIGINS=https://code.husimi.ai,http://127.0.0.1:8795
+
+[Install]
+WantedBy=default.target
