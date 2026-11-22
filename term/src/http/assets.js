@@ -25,7 +25,7 @@ function bundleJs() {
     "if (window.__remoteTerm) return; window.__remoteTerm = true;",
     `var RT = { xterm: ${umd(VENDOR["/term/vendor/xterm.js"][0])},`,
     `  fit: ${umd(VENDOR["/term/vendor/addon-fit.js"][0])} };`,
-    ...client.scripts.map((f) => `// ---- ${path.basename(path.dirname(f))}/${path.basename(f)}\n${read(f)}`),
+    ...client.scripts.map((f) => `// ---- ${path.relative(path.dirname(client.root), f)}\n(function(){\n${read(f)}\n})();`),
     "})();",
   ];
   return parts.join("\n");

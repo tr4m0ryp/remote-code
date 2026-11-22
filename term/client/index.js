@@ -23,4 +23,4 @@ const scripts = [
 
 const styles = ["styles/window.css", "styles/dock.css"].map((f) => path.join(__dirname, f));
 
-module.exports = { scripts, styles };
+module.exports = { root: __filename, scripts, styles };
