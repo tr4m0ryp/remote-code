@@ -41,11 +41,19 @@ class WorkspaceSync {
     for (const f of current) if (!keep.includes(f)) { managed.delete(f.uri.fsPath); this.missing.delete(f.uri.fsPath); }
     await this.context.globalState.update(STATE_KEY, [...managed]);
 
+    // Changing the first folder restarts the extension host, so kept folders hold their order and
+    // new ones append; the first slot is rewritten only when that folder itself is removed.
     const next = [
       ...keep.map((f) => ({ uri: f.uri, name: f.name })),
-      ...added.map((root) => ({ uri: vscode.Uri.file(root), name: live.get(root) })),
-    ].sort((a, b) => a.name.localeCompare(b.name));
-    vscode.workspace.updateWorkspaceFolders(0, current.length, ...next);
+      ...added
+        .map((root) => ({ uri: vscode.Uri.file(root), name: live.get(root) }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    ];
+    if (current.length && keep[0] === current[0]) {
+      vscode.workspace.updateWorkspaceFolders(1, current.length - 1, ...next.slice(1));
+    } else {
+      vscode.workspace.updateWorkspaceFolders(0, current.length, ...next);
+    }
   }
 }
 
