@@ -86,6 +86,20 @@ npx --yes @vscode/vsce@latest package --skip-license --allow-missing-repository 
 code-server --install-extension "/tmp/remote-sessions-$version.vsix" --force
 rm -f "/tmp/remote-sessions-$version.vsix"
 
+# --- math-comments (math-comments/): renders LaTeX in code comments. MathJax is bundled by esbuild into
+# dist/extension.js, so the vsix ships only that file (see math-comments/.vscodeignore). ---
+(
+  cd "$here/math-comments"
+  npm ci --no-audit --no-fund >/dev/null
+  npm run --silent build >/dev/null
+  mc_version=$(node -p 'require("./package.json").version')
+  npx --yes @vscode/vsce@latest package --no-dependencies --skip-license --allow-missing-repository \
+    -o "/tmp/math-comments-$mc_version.vsix" >/dev/null
+  code-server --install-extension "/tmp/math-comments-$mc_version.vsix" --force
+  rm -f "/tmp/math-comments-$mc_version.vsix"
+)
+# --- end math-comments ---
+
 systemctl --user daemon-reload
 systemctl --user enable code-server.service >/dev/null
 systemctl --user restart code-server.service
