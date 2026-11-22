@@ -1,6 +1,7 @@
 code.husimi.ai {
-	basic_auth {
-		moussa <bcrypt hash of the manager basic_auth password>
+	import husimi_sso
+	reverse_proxy 127.0.0.1:8795 {
+		# the shared login cookie is for Caddy and the manager only; code-server never sees it
+		header_up Cookie "(^|;\s*)mgr_sso=[^;]*" ""
 	}
-	reverse_proxy 127.0.0.1:8795
 }
