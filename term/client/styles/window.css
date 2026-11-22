@@ -55,3 +55,30 @@
 .rt-preview.show { display: block; }
 .rt-shield { position: absolute; inset: 0; display: none; pointer-events: auto; z-index: 2147483000; }
 .rt-shield.on { display: block; }
+
+/* Performance: the window composites on its own layer while dragged, and the terminal's layout
+   and paint stay inside its box. */
+.rt-win { contain: layout style; }
+.rt-win.rt-dragging { will-change: transform; }
+.rt-term { contain: strict; }
+
+/* Compose strip: one-line slot under the terminal; taller text grows upward over it. */
+.rt-body { border-radius: 0; }
+.rt-strip { position: relative; flex: none; height: 30px; background: #181818; border-top: 1px solid #2b2b2b;
+  border-radius: 0 0 9px 9px; }
+.rt-strip-box { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 10px 6px 12px; background: #1f1f1f; border-radius: 0 0 9px 9px; border-top: 1px solid #2b2b2b; }
+.rt-caret { flex: none; color: #d77757; font: 13px/18px Menlo, Monaco, Consolas, "DejaVu Sans Mono", monospace; }
+.rt-input { flex: 1; min-width: 0; height: 18px; margin: 0; padding: 0; border: none; outline: none; resize: none;
+  overflow: hidden; background: transparent; color: #cccccc; caret-color: #d77757;
+  font: 13px/18px Menlo, Monaco, Consolas, "DejaVu Sans Mono", monospace; }
+.rt-hint { flex: none; font-size: 11px; line-height: 18px; color: #8b8b8b; }
+.rt-strip.direct .rt-strip-box { background: #1a1a1a; }
+.rt-strip.direct .rt-input, .rt-strip.direct .rt-caret { opacity: .35; }
+.rt-badge { position: relative; z-index: 1; margin-left: auto; padding: 1px 6px; border-radius: 4px; font-size: 10.5px;
+  color: #9d9d9d; background: #333333; cursor: pointer; user-select: none; }
+.rt-win:has(.rt-strip.direct) .rt-badge { color: #1f1f1f; background: #cca700; }
+.rt-status { margin-left: 8px; }
+
+.rt-debug { position: absolute; right: 12px; top: 40px; padding: 4px 8px; border-radius: 6px; pointer-events: none;
+  background: rgba(0, 0, 0, .75); color: #89d185; font: 11px/1.4 Menlo, Consolas, monospace; z-index: 2147483001; }

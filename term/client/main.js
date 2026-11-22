@@ -32,6 +32,7 @@
   window.remoteTerm = {
     open: (tmux) => RT.wm.open(tmux),
     toggleAll: () => RT.wm.toggleAll(),
-    windows: () => [...RT.wm.wins.values()].map((w) => ({ tmux: w.tmux, rect: { ...w.rect }, mode: w.mode, min: w.min })),
+    windows: () => [...RT.wm.wins.values()].map((w) => ({ tmux: w.tmux, rect: { ...w.rect }, mode: w.mode, min: w.min, input: w.compose.mode, renderer: w.renderer })),
+    latency: () => ({ last: RT.latency.last, median: RT.latency.median(), n: RT.latency.samples.length }),
   };
 })();
