@@ -3,7 +3,7 @@
   "displayName": "Remote Sessions",
   "description": "Lists the running Claude remote-control sessions on this host and keeps their projects open as workspace folders.",
   "publisher": "husimi",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "vscode": "^1.90.0"
@@ -32,7 +32,7 @@
         {
           "type": "webview",
           "id": "remoteSessions.promptPanel",
-          "name": "This project"
+          "name": "Sessions"
         }
       ],
       "explorer": [
@@ -44,7 +44,7 @@
         {
           "type": "webview",
           "id": "remoteSessions.prompt",
-          "name": "Claude Sessions"
+          "name": "Sessions"
         }
       ]
     },
@@ -85,10 +85,20 @@
         "command": "remoteSessions.home",
         "title": "Remote Sessions: Home",
         "icon": "$(home)"
+      },
+      {
+        "command": "remoteSessions.launch",
+        "title": "New Session",
+        "icon": "$(add)"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "remoteSessions.launch",
+          "when": "view == remoteSessions.tree",
+          "group": "navigation@0"
+        },
         {
           "command": "remoteSessions.refresh",
           "when": "view == remoteSessions.tree",
@@ -165,6 +175,11 @@
             "~"
           ],
           "description": "Directories never added as workspace folders."
+        },
+        "remoteSessions.launchConfigDir": {
+          "type": "string",
+          "default": "/home/tr4m0ryp/.claude-cavum",
+          "description": "CLAUDE_CONFIG_DIR for sessions started with New Session."
         }
       }
     }

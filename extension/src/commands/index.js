@@ -1,6 +1,8 @@
-// Command handlers for the session tree; the Projects view and Home tab commands live in projects.js.
+// Command handlers for the session tree; the Projects view and Home tab commands live in projects.js,
+// the New Session flow in launch.js.
 const vscode = require("vscode");
 const { registerProjects } = require("./projects");
+const { registerLaunch } = require("./launch");
 const { openTerminal } = require("../term");
 
 function register(context, { refresh, onReveal }) {
@@ -8,6 +10,7 @@ function register(context, { refresh, onReveal }) {
   const reg = (id, fn) => context.subscriptions.push(vscode.commands.registerCommand(id, fn));
 
   reg("remoteSessions.refresh", refresh);
+  registerLaunch(context, { refresh });
 
   // Tree click: point the "This project" panel at the project without leaving the sidebar.
   reg("remoteSessions.select", (el) => {
