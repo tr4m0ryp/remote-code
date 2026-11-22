@@ -2,7 +2,7 @@
 // line, or `$$` / `\[` alone on a comment line opening a block that a later `$$` / `\]` line closes.
 // Dollar rules follow pandoc (no whitespace just inside the dollars, closing `$` not followed by a
 // digit), tightened for code: neither dollar may touch a word character, so $HOME, a$b, $5 and $10,
-// $HOME/$USER and ${VAR} stay text.
+// $HOME/$USER and ${A}/${B} stay text.
 const { isWord } = require("./languages");
 
 const space = (ch) => ch === " " || ch === "\t";
@@ -16,7 +16,7 @@ function inlineClose(s, k) {
   for (let j = k + 1; j < s.length; j++) {
     if (s[j] === "\\") { j++; continue; }
     if (s[j] !== "$") continue;
-    if (space(s[j - 1]) || isWord(s[j + 1]) || s[j + 1] === "$") return -1;
+    if (space(s[j - 1]) || isWord(s[j + 1]) || s[j + 1] === "$" || s[j + 1] === "{") return -1;
     return SHELL_VAR.test(s.slice(k + 1, j)) ? -1 : j;
   }
   return -1;
