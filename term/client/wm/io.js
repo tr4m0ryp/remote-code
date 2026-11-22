@@ -50,8 +50,10 @@ RT.wheel = function (win, ev) {
 };
 
 // WebGL renderer when the browser offers it (falls back to xterm's DOM renderer; xterm 6 has no
-// canvas renderer). A lost GPU context drops back to DOM as well.
+// canvas renderer). A lost GPU context drops back to DOM as well; localStorage
+// remoteTerm.renderer = "dom" forces DOM.
 RT.useWebgl = function (term) {
+  if (localStorage.getItem("remoteTerm.renderer") === "dom") return "dom"; // manual escape hatch
   try {
     const gl = new RT.webgl.WebglAddon();
     gl.onContextLoss(() => gl.dispose());
