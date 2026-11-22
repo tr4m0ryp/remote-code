@@ -15,25 +15,25 @@ function render(nonce, cspSource, scripts) {
   button:hover:not(:disabled) { background: var(--vscode-button-hoverBackground); }
   button:disabled { opacity: .5; cursor: default; }
   .empty { opacity: .7; padding: 0 10px; }
-  .row { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; cursor: pointer; }
+  .row { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 10px 0 12px; cursor: pointer; }
   .row:hover { background: var(--vscode-list-hoverBackground); }
   .row.notmux { cursor: default; opacity: .6; }
-  .pet { position: relative; flex: none; width: 34px; height: 20px; }
-  .clawd { margin: 0; font-family: "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 6.5px; line-height: 1;
-           letter-spacing: 0; color: rgb(215, 119, 87); white-space: pre; }
-  .text { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; line-height: 1.2; }
-  .line { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
+  .pet { position: relative; flex: none; width: 54px; height: 30px; }
+  .clawd { display: block; width: 54px; height: 30px; fill: rgb(215, 119, 87); }
+  .text { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; line-height: 1.25; }
+  .line { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
   .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .spinner { flex: none; color: rgb(255, 153, 51); width: 1em; }
-  .stats { font-size: .8em; color: var(--vscode-descriptionForeground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .row[data-state="working"] .stats { color: rgb(255, 153, 51); }
-  .stats .min { opacity: .7; font-style: italic; color: var(--vscode-descriptionForeground); }
+  .stats { font-size: .82em; color: var(--vscode-descriptionForeground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .word.working { color: rgb(255, 153, 51); }
+  .word.sleeping { opacity: .6; }
+  .stats .min { opacity: .7; font-style: italic; }
   .row.minimised .name { opacity: .75; }
-  .zzz { display: none; position: absolute; left: 30px; top: -2px; font-size: 8px; font-weight: 600;
+  .zzz { display: none; position: absolute; left: 50px; top: -3px; font-size: 9px; font-weight: 600;
          color: var(--vscode-descriptionForeground); }
   .row[data-state="sleeping"] .zzz { display: block; animation: zfloat 2.4s ease-in infinite; }
-  @keyframes zfloat { 0% { opacity: 0; transform: translate(0, 8px) scale(.7); } 30% { opacity: 1; }
-                      100% { opacity: 0; transform: translate(5px, -4px) scale(1.15); } }
+  @keyframes zfloat { 0% { opacity: 0; transform: translate(0, 10px) scale(.7); } 30% { opacity: 1; }
+                      100% { opacity: 0; transform: translate(6px, -4px) scale(1.15); } }
   @media (prefers-reduced-motion: reduce) { .row[data-state="sleeping"] .zzz { animation: none; } }
 </style></head>
 <body><div id="root"></div>
