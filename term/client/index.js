@@ -13,6 +13,7 @@ const scripts = [
   "wm/frame.js",
   "wm/drag.js",
   "wm/resize.js",
+  "wm/io.js",
   "wm/window.js",
   "wm/manager.js",
   "dock/menu.js",
