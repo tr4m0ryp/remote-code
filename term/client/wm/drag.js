@@ -23,7 +23,7 @@ RT.attachDrag = function (win) {
     let frame = 0;
     const paint = () => {
       frame = 0;
-      win.place(target);
+      win.root.style.transform = `translate3d(${target.x - win.rect.x}px, ${target.y - win.rect.y}px, 0)`;
     };
     bar.setPointerCapture(e.pointerId);
     const move = (ev) => {

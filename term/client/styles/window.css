@@ -59,7 +59,7 @@
 /* Performance: the window composites on its own layer while dragged, and the terminal's layout
    and paint stay inside its box. */
 .rt-win { contain: layout style; }
-/* .rt-win.rt-dragging { will-change: transform; } */
+.rt-win.rt-dragging { will-change: transform; }
 .rt-term { contain: strict; }
 
 /* Compose strip: one-line slot under the terminal; taller text grows upward over it. */
