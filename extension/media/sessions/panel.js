@@ -5,7 +5,8 @@
   const vscode = acquireVsCodeApi();
   const root = document.getElementById("root");
   const rows = new Map(); // pane -> { el, clawd, state, uptime, at, lastActive }
-  let first = true;
+  let shownRoot = null;
+  let first = true; // rows built for a freshly shown project do not turn around
 
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -54,6 +55,8 @@
 
   function showProject(p) {
     const keep = new Map();
+    first = !p || p.root !== shownRoot;
+    shownRoot = p ? p.root : null;
     root.replaceChildren(header(p ? p.label : "Sessions"));
     if (!p) return root.append(el("p", "empty", "Open a file in a project to see its sessions."));
     if (!p.sessions.length) root.append(el("p", "empty", "No Claude session is running in this project."));
@@ -68,7 +71,6 @@
     for (const [k, r] of rows) if (!keep.has(k)) r.clawd.clear();
     rows.clear();
     for (const [k, r] of keep) rows.set(k, r);
-    first = false;
   }
 
   function status(m) {
@@ -79,8 +81,9 @@
       const was = r.state;
       r.state = m.state;
       r.el.dataset.state = m.state;
-      if (was === "working" && m.state === "idle") r.clawd.set("finished", "idle");
-      else if (!(r.clawd.state === "spin" && m.state === "idle")) r.clawd.set(m.state);
+      if (r.clawd.state === "spin") r.clawd.after = m.state;
+      else if (was === "working" && m.state === "idle") r.clawd.set("finished", "idle");
+      else r.clawd.set(m.state);
     }
     stats(r);
   }

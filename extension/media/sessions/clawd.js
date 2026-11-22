@@ -75,8 +75,9 @@
       }
       if (state === "spin" && !still()) {
         let i = 0;
+        this.after = then || "idle"; // callers may update it while the turn plays
         this.draw(TURN[0]);
-        return this.every(() => (++i < TURN.length ? this.draw(TURN[i]) : this.set(then || "idle")), 60);
+        return this.every(() => (++i < TURN.length ? this.draw(TURN[i]) : this.set(this.after)), 60);
       }
       this.idle();
     }

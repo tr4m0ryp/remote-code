@@ -13,7 +13,7 @@ function activate(context) {
   context.subscriptions.push(view);
 
   // Same panel in two places: under the Explorer while browsing files, and in the sessions sidebar.
-  const panels = [new SessionsView(), new SessionsView()];
+  const panels = [new SessionsView(context.extensionUri), new SessionsView(context.extensionUri)];
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider("remoteSessions.prompt", panels[0], { webviewOptions: { retainContextWhenHidden: true } }),
     vscode.window.registerWebviewViewProvider("remoteSessions.promptPanel", panels[1], { webviewOptions: { retainContextWhenHidden: true } })
