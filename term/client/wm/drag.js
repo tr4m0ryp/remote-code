@@ -1,5 +1,7 @@
 // Title-bar dragging with edge snapping: the left/right screen edge snaps the window to that half.
-// Dragging a snapped window first restores its normal size under the pointer.
+// Dragging a snapped window first restores its normal size under the pointer. While dragging, the
+// window moves by a compositor-only transform written once per animation frame; left/top are
+// committed on pointerup, so the workbench underneath never relayouts.
 const EDGE = 6;
 
 function snapAt(ev) {
@@ -17,6 +19,12 @@ RT.attachDrag = function (win) {
     const s = { px: e.clientX, py: e.clientY, x: win.rect.x, y: win.rect.y, w: win.rect.w, h: win.rect.h };
     let moved = false;
     let snap = null;
+    let target = null;
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      win.root.style.transform = `translate3d(${target.x - win.rect.x}px, ${target.y - win.rect.y}px, 0)`;
+    };
     bar.setPointerCapture(e.pointerId);
     const move = (ev) => {
       const dx = ev.clientX - s.px;
@@ -35,15 +43,19 @@ RT.attachDrag = function (win) {
         }
       }
       const a = RT.area();
-      win.place({ x: s.x + dx, y: RT.clamp(s.y + dy, a.y, a.y + a.h - 30), w: s.w, h: s.h });
-      snap = snapAt(ev);
-      RT.wm.preview(snap);
+      target = { x: s.x + dx, y: RT.clamp(s.y + dy, a.y, a.y + a.h - 30), w: s.w, h: s.h };
+      if (!frame) frame = requestAnimationFrame(paint);
+      const next = snapAt(ev);
+      if (next !== snap) RT.wm.preview((snap = next));
     };
     const up = () => {
       bar.removeEventListener("pointermove", move);
       bar.removeEventListener("pointerup", up);
       bar.removeEventListener("pointercancel", up);
       if (!moved) return;
+      cancelAnimationFrame(frame);
+      win.root.style.transform = "";
+      if (target) win.place(target);
       RT.wm.shield(false);
       RT.wm.preview(null);
       win.root.classList.remove("rt-dragging");

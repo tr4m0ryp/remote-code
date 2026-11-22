@@ -116,7 +116,7 @@ RT.TermWindow = class {
   }
 
   fit() {
-    if (this.min || !this.f.host.clientWidth) return;
+    if (this.min || RT.wm.resizing || !this.f.host.clientWidth) return;
     const before = this.term.cols + "x" + this.term.rows;
     try {
       this.fitter.fit();

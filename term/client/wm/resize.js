@@ -1,5 +1,6 @@
-// Edge and corner resizing. Resizing a snapped window frees it into a normal one; the
-// terminal refits through the window's ResizeObserver.
+// Edge and corner resizing. Resizing a snapped window frees it into a normal one. The frame follows
+// the pointer once per animation frame; the terminal is refitted (and the pty resized, which makes
+// Claude redraw) only once, on pointerup.
 RT.attachResize = function (win) {
   for (const handle of win.root.querySelectorAll(".rt-h")) {
     handle.addEventListener("pointerdown", (e) => {
@@ -12,6 +13,9 @@ RT.attachResize = function (win) {
       const s = { px: e.clientX, py: e.clientY, ...win.rect };
       handle.setPointerCapture(e.pointerId);
       RT.wm.shield(true, getComputedStyle(handle).cursor);
+      RT.wm.resizing = true;
+      let target = null;
+      let frame = 0;
       const move = (ev) => {
         const dx = ev.clientX - s.px;
         const dy = ev.clientY - s.py;
@@ -26,13 +30,18 @@ RT.attachResize = function (win) {
           y = RT.clamp(s.y + dy, RT.area().y, s.y + s.h - RT.MIN_H);
           h = s.y + s.h - y;
         }
-        win.place({ x, y, w, h });
+        target = { x, y, w, h };
+        if (!frame) frame = requestAnimationFrame(() => ((frame = 0), win.place(target)));
       };
       const up = () => {
         handle.removeEventListener("pointermove", move);
         handle.removeEventListener("pointerup", up);
         handle.removeEventListener("pointercancel", up);
+        cancelAnimationFrame(frame);
+        if (target) win.place(target);
         RT.wm.shield(false);
+        RT.wm.resizing = false;
+        win.fit();
         RT.wm.persist();
       };
       handle.addEventListener("pointermove", move);
