@@ -16,17 +16,21 @@
   };
   const span = (s) => (s < 60 ? "now" : s < 3600 ? Math.round(s / 60) + "m" : s < 86400 ? Math.round(s / 3600) + "h" : Math.round(s / 86400) + "d");
 
+  // "<state> · <activity> · up <uptime>", the state word coloured by state; a minimised window adds a
+  // dimmed marker.
   function stats(r) {
     const now = Date.now();
     const ago = r.state === "working" || !r.lastActive ? "now" : span((now - r.lastActive) / 1000);
-    const up = span(r.uptime + (now - r.at) / 1000);
-    r.stats.textContent = (r.state || "checking") + " · " + (ago === "now" ? "active now" : ago + " ago") + " · up " + up;
-    if (r.window === "minimised") r.stats.prepend(el("span", "min", "minimised · "));
+    const parts = [el("span", "word " + (r.state || "checking"), r.state || "checking"),
+      document.createTextNode(" \u00b7 " + (ago === "now" ? "active now" : ago + " ago") + " \u00b7 up " + span(r.uptime + (now - r.at) / 1000))];
+    if (r.window === "minimised") parts.unshift(el("span", "min", "minimised \u00b7 "));
+    r.stats.replaceChildren(...parts);
   }
 
   function row(s) {
     const item = el("div", "row" + (s.pane ? "" : " notmux"));
-    const pre = el("pre", "clawd");
+    const pre = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    pre.setAttribute("class", "clawd");
     const spinner = el("span", "spinner");
     const zzz = el("span", "zzz", "z");
     const name = el("span", "name", s.name);

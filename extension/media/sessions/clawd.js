@@ -1,6 +1,8 @@
-// Clawd, the Claude Code mascot, as a 3-row block-character sprite for the Sessions panel. The glyph
-// strings below come from Claude Code's own mascot (Claude Code 2.1.330); swap this file to change
-// the art. Clawd(pre) renders into a <pre>; set(state) picks the animation: working, idle,
+// Clawd, the Claude Code mascot, for the Sessions panel. The glyph strings below come from Claude
+// Code's own mascot (Claude Code 2.1.330); swap this file to change the art. Each 3-row, 9-column
+// glyph sprite is turned into a pixel grid (a cell is 2x4 units, a quadrant block fills 1x2-unit
+// quadrants, "▂" fills the cell's bottom unit) and drawn as a crisp SVG, so it never depends on
+// font metrics. Clawd(svg) renders into an <svg>; set(state) picks the animation: working, idle,
 // sleeping, finished (once, then idle) and spin (turn-around once, then the given state).
 (function () {
   const ARMS = {
@@ -29,6 +31,30 @@
   const SPIN = ["·", "✢", "✳", "✶", "✻", "✽"];
   const SPINNER = SPIN.concat(SPIN.slice().reverse()); // forward, then reversed
   const WIDTH = 9;
+  const UNITS_H = 10; // 3 rows x 4 units, minus the feet row's always-empty bottom half
+  // Quadrants per block glyph: top-left, top-right, bottom-left, bottom-right.
+  const QUAD = {
+    "▘": [1, 0, 0, 0], "▝": [0, 1, 0, 0], "▖": [0, 0, 1, 0], "▗": [0, 0, 0, 1], "▌": [1, 0, 1, 0],
+    "▐": [0, 1, 0, 1], "▀": [1, 1, 0, 0], "▄": [0, 0, 1, 1], "▛": [1, 1, 1, 0], "▜": [1, 1, 0, 1],
+    "▙": [1, 0, 1, 1], "▟": [0, 1, 1, 1], "▚": [1, 0, 0, 1], "▞": [0, 1, 1, 0], "█": [1, 1, 1, 1],
+  };
+  const SVG = "http://www.w3.org/2000/svg";
+
+  // Glyph rows -> rows of 0/1 units (WIDTH*2 wide, 4 units per glyph row).
+  function pixels(rows) {
+    const g = Array.from({ length: rows.length * 4 }, () => new Array(WIDTH * 2).fill(0));
+    rows.forEach((row, r) => [...row].forEach((ch, c) => {
+      const x = c * 2;
+      const y = r * 4;
+      if (ch === "▂") return (g[y + 3][x] = g[y + 3][x + 1] = 1);
+      const q = QUAD[ch];
+      if (!q) return;
+      [[0, 0], [1, 0], [0, 2], [1, 2]].forEach(([dx, dy], i) => {
+        if (q[i]) g[y + dy][x + dx] = g[y + dy + 1][x + dx] = 1;
+      });
+    }));
+    return g.slice(0, UNITS_H);
+  }
   const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function sprite(arms, eyes, feet) {
@@ -37,16 +63,37 @@
   }
 
   class Clawd {
-    constructor(pre, spinnerEl) {
-      this.pre = pre;
+    constructor(svg, spinnerEl) {
+      this.svg = svg;
+      svg.setAttribute("viewBox", `0 0 ${WIDTH * 2} ${UNITS_H}`);
+      svg.setAttribute("shape-rendering", "crispEdges");
+      this.key = "";
       this.spinnerEl = spinnerEl;
       this.timers = [];
       this.state = null;
     }
 
+    // One rect per horizontal run of filled units.
     draw(rows) {
-      const text = rows.join("\n");
-      if (this.pre.textContent !== text) this.pre.textContent = text;
+      const key = rows.join("\n");
+      if (key === this.key) return;
+      this.key = key;
+      const rects = [];
+      pixels(rows).forEach((line, y) => {
+        for (let x = 0; x < line.length; x++) {
+          if (!line[x]) continue;
+          let end = x;
+          while (line[end + 1]) end++;
+          const r = document.createElementNS(SVG, "rect");
+          r.setAttribute("x", x);
+          r.setAttribute("y", y);
+          r.setAttribute("width", end - x + 1);
+          r.setAttribute("height", 1);
+          rects.push(r);
+          x = end;
+        }
+      });
+      this.svg.replaceChildren(...rects);
     }
 
     clear() {
@@ -107,5 +154,7 @@
     }
   }
 
+  Clawd.pixels = pixels; // for checks
+  Clawd.sprite = sprite;
   window.Clawd = Clawd;
 })();
