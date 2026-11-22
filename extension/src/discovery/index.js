@@ -13,11 +13,13 @@ async function snapshot({ includeLocal }) {
     procs.map(async (p) => {
       const root = await repoRoot(p.cwd);
       if (!projects.has(root)) projects.set(root, { root, sessions: [] });
-      const tmux = sessionFor(p.pid, parents, panes);
+      const where = sessionFor(p.pid, parents, panes);
+      const tmux = where ? where.session : null;
       projects.get(root).sessions.push({
         pid: p.pid,
         name: p.name || tmux || `pid ${p.pid}`,
         tmux,
+        pane: where ? where.pane : null,
         remote: p.remote,
         uptime: p.uptime,
       });
