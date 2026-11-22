@@ -8,7 +8,7 @@ const guard = require("./guard");
 const ROUTES = { "/term/ws/control": control.attach, "/term/ws/pty": pty.attach };
 
 function install(server) {
-  const wss = new WebSocketServer({ noServer: true, maxPayload: 1 << 20 });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: 1 << 20, perMessageDeflate: false });
   server.on("upgrade", (req, socket, head) => {
     const url = new URL(req.url, "http://localhost");
     const route = ROUTES[url.pathname];
@@ -16,6 +16,7 @@ function install(server) {
       socket.end(`HTTP/1.1 ${route ? "403 Forbidden" : "404 Not Found"}\r\nConnection: close\r\n\r\n`);
       return;
     }
+    socket.setNoDelay(true); // keystrokes and echoes are tiny; never wait for Nagle
     wss.handleUpgrade(req, socket, head, (ws) => {
       ws.alive = true;
       ws.on("pong", () => (ws.alive = true));

@@ -5,6 +5,7 @@ const path = require("path");
 const { run } = require("./exec");
 const { claudeProcesses } = require("./processes");
 const tmux = require("./tmux");
+const { sendPrompt, checkPrompt } = require("./prompt");
 
 const roots = new Map(); // cwd -> git toplevel (or cwd); a directory's repository rarely changes
 
@@ -48,4 +49,4 @@ async function isLive(name) {
   return (await tmux.listSessions()).has(name);
 }
 
-module.exports = { snapshot, isLive, scroll: tmux.scroll, listSessions: tmux.listSessions };
+module.exports = { snapshot, isLive, scroll: tmux.scroll, listSessions: tmux.listSessions, sendPrompt, checkPrompt };

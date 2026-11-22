@@ -47,7 +47,8 @@ function attach(ws) {
   ws.on("message", (raw) => {
     let m;
     try { m = JSON.parse(String(raw)); } catch { return; }
-    if (m && m.type === "windows" && Array.isArray(m.windows)) {
+    if (m && m.type === "ping") ws.send(JSON.stringify({ type: "pong", id: m.id, t: m.t }));
+    else if (m && m.type === "windows" && Array.isArray(m.windows)) {
       ws.windows = m.windows
         .filter((w) => w && typeof w.tmux === "string" && w.tmux.length <= 256)
         .slice(0, 200)
