@@ -1,5 +1,6 @@
 // Control channel: every connected overlay gets the session list (pushed on change, polled every
-// pollMs while anyone listens) and "open" requests posted by the extension.
+// pollMs while anyone listens) and "open" requests posted by the extension; overlays report which
+// session windows they hold and whether each is minimised.
 const WebSocket = require("ws");
 const config = require("../config");
 const sessions = require("../sessions");
@@ -42,7 +43,17 @@ function attach(ws) {
   clients.add(ws);
   if (!timer) timer = setInterval(refresh, config.pollMs);
   current().then((list) => ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify({ type: "sessions", sessions: list })));
-  ws.on("message", () => {}); // the channel is server-to-client; client frames are ignored
+  ws.windows = [];
+  ws.on("message", (raw) => {
+    let m;
+    try { m = JSON.parse(String(raw)); } catch { return; }
+    if (m && m.type === "windows" && Array.isArray(m.windows)) {
+      ws.windows = m.windows
+        .filter((w) => w && typeof w.tmux === "string" && w.tmux.length <= 256)
+        .slice(0, 200)
+        .map((w) => ({ tmux: w.tmux, min: Boolean(w.min) }));
+    }
+  });
   ws.on("close", () => {
     clients.delete(ws);
     if (!clients.size && timer) {
@@ -52,4 +63,11 @@ function attach(ws) {
   });
 }
 
-module.exports = { attach, broadcast, current };
+// [{ tmux, min }] over all overlays: a session counts as minimised only if no page shows it.
+function windows() {
+  const by = new Map();
+  for (const ws of clients) for (const w of ws.windows) by.set(w.tmux, (by.has(w.tmux) ? by.get(w.tmux) : true) && w.min);
+  return [...by].map(([tmux, min]) => ({ tmux, min }));
+}
+
+module.exports = { attach, broadcast, current, windows };

@@ -1,13 +1,13 @@
 // Builds the DOM of one window: title bar with a single (yellow) minimise light, terminal body, a
 // notice strip for detached sessions, and eight edge/corner resize handles. Windows have no close or
-// maximise control by design: they only go to the dock and back.
+// maximise control by design: a minimised window comes back from its row in the Sessions panel.
 const HANDLES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"];
 
 RT.frame = function (title) {
   const root = RT.el("div", "rt-win");
   const bar = RT.el("div", "rt-bar");
   const lights = RT.el("div", "rt-lights");
-  const min = RT.el("button", "rt-light rt-minbtn", { title: "Minimise to dock", "aria-label": "Minimise" });
+  const min = RT.el("button", "rt-light rt-minbtn", { title: "Minimise", "aria-label": "Minimise" });
   lights.append(min);
   const titleEl = RT.el("div", "rt-title", { text: title });
   const status = RT.el("div", "rt-status");
