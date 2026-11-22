@@ -7,6 +7,7 @@ const path = require("path");
 const vscode = require("vscode");
 const { render } = require("./html");
 const { buildModel } = require("./data");
+const { latestEdited } = require("./latest");
 
 const VIEW_TYPE = "remoteSessions.home";
 const REFRESH_MS = 10000;
@@ -70,13 +71,21 @@ class HomePanel {
     }
   }
 
+  // "Open" on a card: drill into the project, open its most recently edited file, then close Home.
+  async openAndClose(root) {
+    await this.openProject(root);
+    const file = await latestEdited(root);
+    if (file) await vscode.commands.executeCommand("vscode.open", vscode.Uri.file(file), { preview: false });
+    if (this.panel) this.panel.dispose();
+  }
+
   // Every message is checked: roots must be workspace folders, files must resolve inside that root.
   async onMessage(m) {
     if (!m || typeof m !== "object") return;
     if (m.type === "ready" || m.type === "refresh") return this.refresh(true);
     const root = typeof m.root === "string" && folderRoots().includes(m.root) ? m.root : null;
     if (!root) return;
-    if (m.type === "open") return this.openProject(root);
+    if (m.type === "open") return this.openAndClose(root);
     if (m.type !== "openFile" || typeof m.path !== "string") return;
     const file = path.resolve(root, m.path);
     if (!file.startsWith(root + path.sep)) return;
