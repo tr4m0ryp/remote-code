@@ -1,9 +1,11 @@
-// Discovery root: one snapshot of running Claude sessions grouped by project directory.
+// Discovery root: one snapshot of running Claude sessions grouped by project directory, plus the git
+// helpers other modules reuse.
 const os = require("os");
 const path = require("path");
 const { claudeProcesses } = require("./processes");
 const { paneSessions, sessionFor } = require("./tmux");
 const { repoRoot, repoStatus } = require("./git");
+const { changedFiles, firstCommitAt, birthtime } = require("./changes");
 
 // Returns [{ root, label, git, sessions: [{pid, name, tmux, remote, uptime}] }], sorted by label.
 async function snapshot({ includeLocal }) {
@@ -43,4 +45,4 @@ function labelProjects(list) {
   }
 }
 
-module.exports = { snapshot, ...require("./changes"), ...require("./git") };
+module.exports = { snapshot, repoRoot, repoStatus, changedFiles, firstCommitAt, birthtime };
