@@ -3,7 +3,7 @@
 // a debounced file watcher while drilled in.
 const vscode = require("vscode");
 const { ProjectsProvider } = require("./provider");
-const { repoStatus } = require("../../discovery/git");
+const { repoStatus } = require("../../discovery");
 
 const DOUBLE_MS = 450;
 const WATCH_DEBOUNCE_MS = 300;
