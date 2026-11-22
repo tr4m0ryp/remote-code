@@ -6,6 +6,7 @@ const { claudeProcesses } = require("./processes");
 const { paneSessions, sessionFor } = require("./tmux");
 const { repoRoot, repoStatus } = require("./git");
 const { changedFiles, firstCommitAt, birthtime } = require("./changes");
+const { paneStatus } = require("./pane");
 
 // Returns [{ root, label, git, sessions: [{pid, name, tmux, remote, uptime}] }], sorted by label.
 async function snapshot({ includeLocal }) {
@@ -45,4 +46,4 @@ function labelProjects(list) {
   }
 }
 
-module.exports = { snapshot, repoRoot, repoStatus, changedFiles, firstCommitAt, birthtime };
+module.exports = { snapshot, repoRoot, repoStatus, changedFiles, firstCommitAt, birthtime, paneStatus };

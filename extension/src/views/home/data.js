@@ -2,8 +2,7 @@
 // "being worked on now" (a busy session pane or a change in the last 15 min) and "recently added"
 // (joined the workspace, folder created or first commit in the last 72 h).
 const path = require("path");
-const { changedFiles, firstCommitAt, birthtime } = require("../../discovery");
-const { paneStatus } = require("../../prompt");
+const { changedFiles, firstCommitAt, birthtime, paneStatus } = require("../../discovery");
 
 const WORKING_MS = 15 * 60 * 1000;
 const RECENT_MS = 72 * 3600 * 1000;

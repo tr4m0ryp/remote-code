@@ -2,7 +2,7 @@
 // folder sync.
 const vscode = require("vscode");
 const { snapshot } = require("./discovery");
-const { SessionTree, PromptView, ProjectsView, HomePanel } = require("./views");
+const { SessionTree, SessionsView, ProjectsView, HomePanel } = require("./views");
 const { WorkspaceSync, applyFirstRunLayout } = require("./workspace");
 const { register, registerProjects } = require("./commands");
 
@@ -13,12 +13,12 @@ function activate(context) {
   context.subscriptions.push(view);
 
   // Same panel in two places: under the Explorer while browsing files, and in the sessions sidebar.
-  const prompts = [new PromptView(), new PromptView()];
+  const panels = [new SessionsView(), new SessionsView()];
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider("remoteSessions.prompt", prompts[0], { webviewOptions: { retainContextWhenHidden: true } }),
-    vscode.window.registerWebviewViewProvider("remoteSessions.promptPanel", prompts[1], { webviewOptions: { retainContextWhenHidden: true } })
+    vscode.window.registerWebviewViewProvider("remoteSessions.prompt", panels[0], { webviewOptions: { retainContextWhenHidden: true } }),
+    vscode.window.registerWebviewViewProvider("remoteSessions.promptPanel", panels[1], { webviewOptions: { retainContextWhenHidden: true } })
   );
-  const select = (p) => prompts.forEach((v) => v.show(p));
+  const select = (p) => panels.forEach((v) => v.show(p));
   const projects = new ProjectsView(context, { onSelect: select });
 
   // Panels follow the active file, except while the Projects view is drilled into one project.
@@ -27,7 +27,7 @@ function activate(context) {
     return ed && ed.document.uri.scheme === "file" ? ed.document.uri.fsPath : null;
   };
   context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor(() => { if (!projects.focused) prompts.forEach((v) => v.follow(activePath())); })
+    vscode.window.onDidChangeActiveTextEditor(() => { if (!projects.focused) panels.forEach((v) => v.follow(activePath())); })
   );
 
   let latest = [];
@@ -45,7 +45,7 @@ function activate(context) {
       const cfg = vscode.workspace.getConfiguration("remoteSessions");
       latest = (await snapshot({ includeLocal: cfg.get("includeLocal", true) })).filter((p) => !sync.excluded(p.root));
       tree.update(latest);
-      prompts.forEach((v) => { v.setProjects(latest); if (!v.root) v.follow(activePath()); });
+      panels.forEach((v) => { v.setProjects(latest); if (!v.root) v.follow(activePath()); });
       const n = latest.reduce((a, p) => a + p.sessions.length, 0);
       view.badge = { value: n, tooltip: `${n} running Claude sessions` };
       if (cfg.get("syncWorkspace", true)) await sync.apply(latest);
