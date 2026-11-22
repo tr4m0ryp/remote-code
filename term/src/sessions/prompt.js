@@ -4,6 +4,7 @@
 // exactly as written.
 const crypto = require("crypto");
 const { execFile } = require("child_process");
+const { run } = require("./exec");
 
 const MAX_BYTES = 100 * 1024;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -25,6 +26,21 @@ function checkPrompt(text) {
   return null;
 }
 
+// Letters and digits only, so Claude's rendering (markdown, wrapping, quotes) cannot break a match.
+const squash = (s) => s.replace(/[^\p{L}\p{N}]+/gu, "").toLowerCase();
+
+// True once the start of the prompt shows up in the pane (as a sent or queued message).
+async function landed(target, body) {
+  const first = squash(body.split("\n").find((l) => l.trim()) || "").slice(0, 24);
+  for (let i = 0; i < 6; i++) {
+    await sleep(250);
+    if (squash(await run("tmux", ["capture-pane", "-p", "-J", "-t", target, "-S", "-80"])).includes(first)) return true;
+  }
+  return false;
+}
+
+// Resolves { confirmed }: false means tmux accepted the paste but the text never appeared in the
+// pane, so the client puts it back in the strip instead of losing it.
 async function sendPrompt(session, text) {
   const body = text.toWellFormed().replace(/\r\n?/g, "\n").replace(/\n+$/, "");
   const target = "=" + session + ":";
@@ -33,6 +49,7 @@ async function sendPrompt(session, text) {
   await tmuxIn(["paste-buffer", "-p", "-d", "-b", buffer, "-t", target], "");
   await sleep(250);
   await tmuxIn(["send-keys", "-t", target, "Enter"], "");
+  return { confirmed: await landed(target, body) };
 }
 
 module.exports = { sendPrompt, checkPrompt, MAX_BYTES };

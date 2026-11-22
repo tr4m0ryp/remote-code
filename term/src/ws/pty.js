@@ -65,8 +65,9 @@ async function attach(ws, url) {
     if (m.t === "i" && typeof m.d === "string") term.write(m.d);
     else if (m.t === "prompt") {
       let error = sessions.checkPrompt(m.text) || ((await sessions.isLive(name)) ? null : "session ended");
-      if (!error) error = await sessions.sendPrompt(name, m.text).then(() => null, (err) => err.message);
-      sendJson({ t: "prompt", id: m.id, ok: !error, error: error || undefined });
+      let confirmed = false;
+      if (!error) error = await sessions.sendPrompt(name, m.text).then((r) => ((confirmed = r.confirmed), null), (err) => err.message);
+      sendJson({ t: "prompt", id: m.id, ok: !error, confirmed, error: error || undefined });
     }
     else if (m.t === "r") term.resize(clampInt(m.c, 20, 500, cols), clampInt(m.r, 5, 200, rows));
     else if (m.t === "s" && Number.isFinite(m.n) && m.n !== 0) sessions.scroll(name, m.n);

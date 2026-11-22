@@ -150,6 +150,7 @@ RT.Compose = class {
   submit() {
     const text = this.input.value;
     if (!text.trim()) return;
+    this.pendingText = text;
     this.win.pty.prompt(text, Date.now());
     if (this.history[this.history.length - 1] !== text) this.history.push(text);
     this.hIndex = -1;
@@ -158,8 +159,15 @@ RT.Compose = class {
     this.hint.textContent = "sending";
   }
 
+  // A prompt that failed, or never showed up in the pane, comes back into an empty strip.
   onPrompt(m) {
-    this.hint.textContent = m.ok ? "" : "not sent: " + (m.error || "error");
+    const lost = !m.ok || !m.confirmed;
+    if (lost && this.pendingText && !this.input.value) {
+      this.input.value = this.pendingText;
+      this.grow();
+    }
+    this.pendingText = null;
+    this.hint.textContent = !m.ok ? "not sent: " + (m.error || "error") : m.confirmed ? "" : "not confirmed: text restored";
   }
 
   // Height follows the text (wrapped lines included) up to MAX_LINES, then the textarea scrolls.
