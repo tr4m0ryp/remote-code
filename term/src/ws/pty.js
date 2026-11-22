@@ -42,9 +42,11 @@ async function attach(ws, url) {
     ws.send(d);
     if (!paused && ws.bufferedAmount > HIGH_WATER) { paused = true; term.pause(); setTimeout(drain, 40); }
   });
-  term.onExit(() => {
+  // 4404 when the session itself ended (the window then goes away), 4000 when only this client left.
+  term.onExit(async () => {
     live.delete(term);
-    if (ws.readyState === WebSocket.OPEN) ws.close(4000, "detached");
+    const gone = !(await sessions.isLive(name));
+    if (ws.readyState === WebSocket.OPEN) ws.close(gone ? 4404 : 4000, gone ? "session ended" : "detached");
   });
   ws.on("message", (raw) => {
     let m;
