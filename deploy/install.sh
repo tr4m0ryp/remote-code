@@ -37,7 +37,6 @@ const forced = {
   "github.gitAuthentication": false,
   "git.openRepositoryInParentFolders": "never",
   "remote.autoForwardPorts": false,
-  "workbench.activity.showAccounts": false,
   "debug.showInStatusBar": "never",
   "outline.collapseItems": "alwaysCollapse",
 };
@@ -57,13 +56,15 @@ for ext in copilot prompt-basics \
   rm -rf "${builtin:?}/$ext"
 done
 
-# product.json still advertises Copilot as the default chat agent, which brings back a
-# "Use AI Features with Copilot" command and a wait for the GitHub sign-in provider. Remove that key.
-node -e '
-const fs = require("fs"), f = process.argv[1], p = JSON.parse(fs.readFileSync(f, "utf8"));
-for (const k of ["defaultChatAgent", "chatParticipantRegistry", "chatSessionRecommendations"]) delete p[k];
-fs.writeFileSync(f, JSON.stringify(p, null, "\t"));
-' "$HOME/.local/lib/code-server/lib/vscode/product.json"
+# Some defaults are compiled into the browser bundle, out of reach of settings: the Copilot setup
+# command, the Accounts icon and the Forwarded Ports status item. Patch them out. Idempotent: once
+# patched, the patterns no longer match.
+wb="$HOME/.local/lib/code-server/lib/vscode/out/vs/code/browser/workbench/workbench.js"
+sed -i -E \
+  -e 's/(title:[A-Za-z_$]+\.CHAT_SETUP_ACTION_LABEL,category:[A-Za-z_$]+,f1:)!0/\1!1/' \
+  -e 's/(ACCOUNTS_VISIBILITY_PREFERENCE_KEY,0,)!0\)/\1!1)/' \
+  -e 's/updateStatusBar\(\)\{!this\.environmentService\.remoteAuthority&&/updateStatusBar(){return;!this.environmentService.remoteAuthority\&\&/' \
+  "$wb"
 
 cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
 sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \
