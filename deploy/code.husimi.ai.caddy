@@ -1,0 +1,6 @@
+code.husimi.ai {
+	basic_auth {
+		moussa <bcrypt hash of the manager basic_auth password>
+	}
+	reverse_proxy 127.0.0.1:8795
+}

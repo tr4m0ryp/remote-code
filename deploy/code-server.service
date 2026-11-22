@@ -1,0 +1,12 @@
+[Unit]
+Description=code-server editor (http://127.0.0.1:8795, public at code.husimi.ai behind Caddy basic_auth)
+After=network-online.target
+
+[Service]
+ExecStart=/home/tr4m0ryp/.local/bin/code-server
+Restart=on-failure
+RestartSec=5
+Environment=PATH=/home/tr4m0ryp/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target

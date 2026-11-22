@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Builds the Remote Sessions extension, installs it into code-server, and (re)starts code-server
+# on the live multi-root workspace that the extension keeps in sync with running Claude sessions.
+set -euo pipefail
+here="$(cd "$(dirname "$0")/.." && pwd)"
+data="$HOME/.local/share/code-server"
+live="$data/live.code-workspace"
+
+mkdir -p "$data/User" "$HOME/.config/code-server" "$HOME/.config/systemd/user"
+[ -f "$live" ] || printf '{\n  "folders": [],\n  "settings": {}\n}\n' > "$live"
+[ -f "$data/User/settings.json" ] || cat > "$data/User/settings.json" <<'JSON'
+{
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.startupEditor": "none",
+  "security.workspace.trust.enabled": false,
+  "git.autoRepositoryDetection": "openEditors",
+  "files.watcherExclude": { "**/node_modules/**": true, "**/.venv/**": true, "**/data/**": true }
+}
+JSON
+
+cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
+sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \
+  > "$HOME/.config/systemd/user/code-server.service"
+
+cd "$here/extension"
+version=$(node -p 'require("./package.json").version')
+npx --yes @vscode/vsce@latest package --skip-license --allow-missing-repository -o "/tmp/remote-sessions-$version.vsix" >/dev/null
+code-server --install-extension "/tmp/remote-sessions-$version.vsix" --force
+rm -f "/tmp/remote-sessions-$version.vsix"
+
+systemctl --user daemon-reload
+systemctl --user enable code-server.service >/dev/null
+systemctl --user restart code-server.service
+echo "installed remote-sessions $version; code-server restarted on $live"
