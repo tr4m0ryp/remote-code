@@ -3,6 +3,8 @@ code.husimi.ai {
 	# remote-term: floating terminal overlay assets, API and websockets (term/, 127.0.0.1:8796)
 	handle /term/* {
 		reverse_proxy 127.0.0.1:8796 {
+			# stream every byte at once: terminal echo must never wait in a proxy buffer
+			flush_interval -1
 			header_up Cookie "(^|;\s*)mgr_sso=[^;]*" ""
 		}
 	}

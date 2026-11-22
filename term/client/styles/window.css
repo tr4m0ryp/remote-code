@@ -64,7 +64,7 @@
 
 /* Compose strip: one-line slot under the terminal; taller text grows upward over it. */
 .rt-body { border-radius: 0; }
-.rt-strip { position: relative; flex: none; height: 30px; background: #181818; border-top: 1px solid #2b2b2b;
+.rt-strip { position: relative; flex: none; height: 30px; background: #181818;
   border-radius: 0 0 9px 9px; }
 .rt-strip-box { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-start; gap: 8px;
   padding: 6px 10px 6px 12px; background: #1f1f1f; border-radius: 0 0 9px 9px; border-top: 1px solid #2b2b2b; }
