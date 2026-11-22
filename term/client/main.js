@@ -11,20 +11,17 @@
   const layer = RT.el("div", "rt-layer");
   document.body.append(layer);
   RT.wm.init(layer);
-  RT.dock.init(layer);
   RT.keys.init(layer);
   RT.control.on("sessions", (list) => {
     RT.wm.onSessions(list);
-    RT.dock.render();
-    if (RT.menu.isOpen()) RT.menu.render();
   });
-  // Open requests reach every editor tab; only a visible one acts, so background tabs stay untouched.
+  // Open requests (a click on a session in the editor's Sessions panel) open the window, or restore
+  // and focus it when minimised. They reach every editor tab; only a visible one acts.
   RT.control.on("open", (tmux) => document.visibilityState === "visible" && RT.wm.open(tmux));
   RT.wm.restoreAll();
   RT.control.start();
   window.remoteTerm = {
     open: (tmux) => RT.wm.open(tmux),
-    tile: () => RT.wm.tile(),
     toggleAll: () => RT.wm.toggleAll(),
     windows: () => [...RT.wm.wins.values()].map((w) => ({ tmux: w.tmux, rect: { ...w.rect }, mode: w.mode, min: w.min })),
   };

@@ -16,12 +16,10 @@ const scripts = [
   "wm/io.js",
   "wm/window.js",
   "wm/manager.js",
-  "dock/menu.js",
-  "dock/dock.js",
   "core/keys.js",
   "main.js",
 ].map((f) => path.join(__dirname, f));
 
-const styles = ["styles/window.css", "styles/dock.css"].map((f) => path.join(__dirname, f));
+const styles = ["styles/window.css"].map((f) => path.join(__dirname, f));
 
 module.exports = { root: __filename, scripts, styles };

@@ -97,7 +97,7 @@ RT.TermWindow = class {
     this.min = true;
     this.root.classList.add("rt-min");
     this.term.blur();
-    RT.dock.render();
+    RT.wm.report();
     RT.wm.persist();
   }
 
@@ -105,7 +105,7 @@ RT.TermWindow = class {
     if (!this.min) return;
     this.min = false;
     this.root.classList.remove("rt-min");
-    RT.dock.render();
+    RT.wm.report();
     RT.wm.persist();
     requestAnimationFrame(() => this.fit());
   }

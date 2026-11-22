@@ -1,4 +1,5 @@
-// Control websocket: receives the session list and "open" requests; reconnects with backoff.
+// Control websocket: receives the session list and "open" requests, reports this page's windows;
+// reconnects with backoff.
 RT.control = {
   sessions: [],
   listeners: { sessions: [], open: [] },
@@ -21,11 +22,19 @@ RT.control = {
     return this.sessions.find((s) => s.tmux === tmux) || null;
   },
 
+  send(msg) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(msg));
+  },
+
   start() {
     let delay = 1000;
     const connect = () => {
       const ws = new WebSocket(RT.wsUrl("/term/ws/control"));
-      ws.onopen = () => (delay = 1000);
+      this.ws = ws;
+      ws.onopen = () => {
+        delay = 1000;
+        RT.wm.report();
+      };
       ws.onmessage = (e) => {
         let m;
         try {

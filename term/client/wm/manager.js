@@ -1,5 +1,6 @@
 // Window manager: registry keyed by tmux session, z-order and focus, snap preview, drag shield,
-// Tile, minimise-all, and persistence of every window's geometry.
+// minimise-all, persistence of every window's geometry, and reporting which sessions are open or
+// minimised to the service (the editor's Sessions panel marks minimised ones; clicking restores).
 RT.wm = {
   wins: new Map(),
   z: 10,
@@ -31,7 +32,7 @@ RT.wm = {
     win.mount(this.layer);
     if (state && state.min) win.minimise();
     else win.focus(opts.focus !== false);
-    RT.dock.render();
+    RT.wm.report();
     this.persist();
     return win;
   },
@@ -40,7 +41,7 @@ RT.wm = {
   remove(win) {
     this.wins.delete(win.tmux);
     win.dispose();
-    RT.dock.render();
+    RT.wm.report();
     this.persist();
   },
 
@@ -61,18 +62,6 @@ RT.wm = {
   shield(on, cursor) {
     this.shieldEl.classList.toggle("on", on);
     this.shieldEl.style.cursor = on ? cursor || "default" : "";
-  },
-
-  tile() {
-    const list = [...this.wins.values()].filter((w) => !w.dead);
-    if (!list.length) return;
-    const rects = RT.layout.grid(list.length);
-    list.forEach((w, i) => {
-      w.restore();
-      w.setMode("normal", rects[i]);
-      w.focus(false);
-    });
-    this.persist();
   },
 
   // Minimises every window when any is showing, otherwise restores them all.
@@ -98,6 +87,10 @@ RT.wm = {
     }
     RT.store.save(out);
   }, 150),
+
+  report: RT.debounce(function () {
+    RT.control.send({ type: "windows", windows: [...RT.wm.wins.values()].filter((w) => !w.dead).map((w) => ({ tmux: w.tmux, min: w.min })) });
+  }, 100),
 
   restoreAll() {
     const saved = Object.entries(RT.store.load()).sort((a, b) => (a[1].z || 0) - (b[1].z || 0));
