@@ -21,6 +21,7 @@
     const ago = r.state === "working" || !r.lastActive ? "now" : span((now - r.lastActive) / 1000);
     const up = span(r.uptime + (now - r.at) / 1000);
     r.stats.textContent = (r.state || "checking") + " · " + (ago === "now" ? "active now" : ago + " ago") + " · up " + up;
+    if (r.window === "minimised") r.stats.prepend(el("span", "min", "minimised · "));
   }
 
   function row(s) {
@@ -78,6 +79,8 @@
     const r = rows.get(m.pane);
     if (!r) return;
     r.lastActive = m.lastActive;
+    r.window = m.window;
+    r.el.classList.toggle("minimised", m.window === "minimised");
     if (m.state !== r.state) {
       const was = r.state;
       r.state = m.state;

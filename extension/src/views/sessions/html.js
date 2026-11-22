@@ -27,6 +27,8 @@ function render(nonce, cspSource, scripts) {
   .spinner { flex: none; color: rgb(255, 153, 51); width: 1em; }
   .stats { font-size: .8em; color: var(--vscode-descriptionForeground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .row[data-state="working"] .stats { color: rgb(255, 153, 51); }
+  .stats .min { opacity: .7; font-style: italic; color: var(--vscode-descriptionForeground); }
+  .row.minimised .name { opacity: .75; }
   .zzz { display: none; position: absolute; left: 30px; top: -2px; font-size: 8px; font-weight: 600;
          color: var(--vscode-descriptionForeground); }
   .row[data-state="sleeping"] .zzz { display: block; animation: zfloat 2.4s ease-in infinite; }
