@@ -1,7 +1,15 @@
 code.husimi.ai {
 	import husimi_sso
-	reverse_proxy 127.0.0.1:8795 {
-		# the shared login cookie is for Caddy and the manager only; code-server never sees it
-		header_up Cookie "(^|;\s*)mgr_sso=[^;]*" ""
+	# remote-term: floating terminal overlay assets, API and websockets (term/, 127.0.0.1:8796)
+	handle /term/* {
+		reverse_proxy 127.0.0.1:8796 {
+			header_up Cookie "(^|;\s*)mgr_sso=[^;]*" ""
+		}
+	}
+	handle {
+		reverse_proxy 127.0.0.1:8795 {
+			# the shared login cookie is for Caddy and the manager only; code-server never sees it
+			header_up Cookie "(^|;\s*)mgr_sso=[^;]*" ""
+		}
 	}
 }
