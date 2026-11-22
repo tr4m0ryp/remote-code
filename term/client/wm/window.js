@@ -19,7 +19,7 @@ RT.TermWindow = class {
     this.f.close.onclick = () => RT.wm.close(this);
     this.f.min.onclick = () => this.minimise();
     this.f.max.onclick = () => this.toggleMax();
-    this.f.noteBtn.onclick = () => this.reattach();
+    this.f.noteBtn.onclick = () => RT.reattach(this);
     this.root.addEventListener("pointerdown", () => this.focus(), true);
     RT.attachDrag(this);
     RT.attachResize(this);
@@ -36,7 +36,7 @@ RT.TermWindow = class {
     this.fitter = new RT.fit.FitAddon();
     this.term.loadAddon(this.fitter);
     this.term.onData((d) => this.pty && this.pty.input(d));
-    this.term.attachCustomWheelEventHandler((ev) => this.onWheel(ev));
+    this.term.attachCustomWheelEventHandler((ev) => RT.wheel(this, ev));
   }
 
   mount(layer) {
@@ -45,51 +45,7 @@ RT.TermWindow = class {
     this.fit();
     this.ro = new ResizeObserver(RT.debounce(() => this.fit(), 40));
     this.ro.observe(this.f.host);
-    this.connect();
-  }
-
-  connect() {
-    this.pty = new RT.PtyConn(this.tmux, { cols: this.term.cols, rows: this.term.rows }, {
-      size: () => ({ cols: this.term.cols, rows: this.term.rows }),
-      onOpen: (again) => {
-        if (again) this.term.reset(); // tmux redraws the whole screen on attach
-        this.setStatus("");
-        this.notice(null);
-      },
-      onData: (d) => this.term.write(d),
-      onStatus: (s) => this.setStatus(s),
-      onEnded: () => this.notice("Detached from " + this.tmux + ".", "Reattach"),
-      onGone: () => {
-        this.dead = true;
-        this.notice("Session " + this.tmux + " is no longer running.", null);
-        RT.wm.persist();
-      },
-    });
-  }
-
-  reattach() {
-    if (this.pty) this.pty.close();
-    this.term.reset();
-    this.notice(null);
-    this.connect();
-    this.focus();
-  }
-
-  // tmux keeps the terminal on its alternate screen, so the wheel scrolls tmux history (copy-mode)
-  // instead of xterm's own scrollback, which would otherwise turn into arrow keys for Claude.
-  onWheel(ev) {
-    if (this.term.buffer.active.type !== "alternate" || this.term.modes.mouseTrackingMode !== "none") return true;
-    ev.preventDefault();
-    this.wheel += ev.deltaMode === 1 ? ev.deltaY : ev.deltaY / 33;
-    if (!this.wheelTimer) {
-      this.wheelTimer = setTimeout(() => {
-        this.wheelTimer = null;
-        const n = Math.trunc(this.wheel);
-        this.wheel -= n;
-        if (n && this.pty) this.pty.scroll(n);
-      }, 60);
-    }
-    return false;
+    RT.connect(this);
   }
 
   setTitle(session) {
