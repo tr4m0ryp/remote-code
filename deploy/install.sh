@@ -36,6 +36,10 @@ const forced = {
   "telemetry.telemetryLevel": "off",
   "github.gitAuthentication": false,
   "git.openRepositoryInParentFolders": "never",
+  "remote.autoForwardPorts": false,
+  "workbench.activity.showAccounts": false,
+  "debug.showInStatusBar": "never",
+  "outline.collapseItems": "alwaysCollapse",
 };
 fs.writeFileSync(f, JSON.stringify({ ...defaults, ...cur, ...forced }, null, 2) + "\n");
 JS
@@ -52,6 +56,14 @@ for ext in copilot prompt-basics \
   theme-solarized-dark theme-solarized-light theme-tomorrow-night-blue; do
   rm -rf "${builtin:?}/$ext"
 done
+
+# product.json still advertises Copilot as the default chat agent, which brings back a
+# "Use AI Features with Copilot" command and a wait for the GitHub sign-in provider. Remove that key.
+node -e '
+const fs = require("fs"), f = process.argv[1], p = JSON.parse(fs.readFileSync(f, "utf8"));
+for (const k of ["defaultChatAgent", "chatParticipantRegistry", "chatSessionRecommendations"]) delete p[k];
+fs.writeFileSync(f, JSON.stringify(p, null, "\t"));
+' "$HOME/.local/lib/code-server/lib/vscode/product.json"
 
 cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
 sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \

@@ -3,7 +3,7 @@
   "displayName": "Remote Sessions",
   "description": "Lists the running Claude remote-control sessions on this host and keeps their projects open as workspace folders.",
   "publisher": "husimi",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "vscode": "^1.90.0"
@@ -38,7 +38,8 @@
         {
           "type": "webview",
           "id": "remoteSessions.prompt",
-          "name": "Claude Sessions"
+          "name": "Claude Sessions",
+          "initialSize": 4
         }
       ]
     },
@@ -56,6 +57,10 @@
         "command": "remoteSessions.watch",
         "title": "Watch Session (read-only terminal)",
         "icon": "$(eye)"
+      },
+      {
+        "command": "remoteSessions.select",
+        "title": "Show Sessions for Project"
       }
     ],
     "menus": {
@@ -71,6 +76,11 @@
           "command": "remoteSessions.watch",
           "when": "view == remoteSessions.tree && viewItem == session",
           "group": "inline"
+        },
+        {
+          "command": "remoteSessions.reveal",
+          "when": "view == remoteSessions.tree && viewItem == project",
+          "group": "navigation"
         }
       ]
     },

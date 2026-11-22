@@ -39,7 +39,7 @@ function projectItem(p) {
   item.iconPath = new vscode.ThemeIcon(p.git && p.git.changed ? "repo-forked" : "repo");
   item.contextValue = "project";
   item.resourceUri = vscode.Uri.file(p.root);
-  item.command = { command: "remoteSessions.reveal", title: "Show in Explorer", arguments: [{ kind: "project", project: p }] };
+  item.command = { command: "remoteSessions.select", title: "Show Sessions", arguments: [{ kind: "project", project: p }] };
   return item;
 }
 
@@ -49,7 +49,7 @@ function sessionItem(s, p) {
   item.tooltip = `${s.remote ? "remote-control" : "local"} session, pid ${s.pid}\n${p.root}`;
   item.iconPath = new vscode.ThemeIcon(s.remote ? "broadcast" : "terminal");
   item.contextValue = s.tmux ? "session" : "session-notmux";
-  item.command = { command: "remoteSessions.reveal", title: "Show in Explorer", arguments: [{ kind: "project", project: p }] };
+  item.command = { command: "remoteSessions.select", title: "Show Sessions", arguments: [{ kind: "project", project: p }] };
   return item;
 }
 

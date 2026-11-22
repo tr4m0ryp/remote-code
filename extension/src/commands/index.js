@@ -7,6 +7,12 @@ function register(context, { refresh, onReveal }) {
 
   reg("remoteSessions.refresh", refresh);
 
+  // Tree click: point the "This project" panel at the project without leaving the sidebar.
+  reg("remoteSessions.select", (el) => {
+    const p = projectOf(el);
+    if (p) onReveal(p);
+  });
+
   reg("remoteSessions.reveal", async (el) => {
     const p = projectOf(el);
     if (!p) return;

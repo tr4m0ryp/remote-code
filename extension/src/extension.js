@@ -32,7 +32,7 @@ function activate(context) {
     busy = true;
     try {
       const cfg = vscode.workspace.getConfiguration("remoteSessions");
-      const projects = await snapshot({ includeLocal: cfg.get("includeLocal", true) });
+      const projects = (await snapshot({ includeLocal: cfg.get("includeLocal", true) })).filter((p) => !sync.excluded(p.root));
       tree.update(projects);
       prompts.forEach((v) => { v.setProjects(projects); if (!v.root) v.follow(activePath()); });
       const n = projects.reduce((a, p) => a + p.sessions.length, 0);
