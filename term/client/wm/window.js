@@ -3,7 +3,7 @@
 RT.TermWindow = class {
   constructor(session, state) {
     this.tmux = session.tmux;
-    this.label = state.title || RT.titleOf(session);
+    this.label = session.title || RT.titleOf(session);
     this.f = RT.frame(this.label);
     this.root = this.f.root;
     this.root.dataset.tmux = this.tmux;

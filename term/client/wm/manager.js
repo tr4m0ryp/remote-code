@@ -25,7 +25,7 @@ RT.wm = {
       have.focus();
       return have;
     }
-    const session = RT.control.find(tmux) || { tmux, name: tmux, project: "" };
+    const session = RT.control.find(tmux) || { tmux, name: tmux, project: "", title: state && state.title };
     const win = new RT.TermWindow(session, state || {});
     this.wins.set(tmux, win);
     win.mount(this.layer);
