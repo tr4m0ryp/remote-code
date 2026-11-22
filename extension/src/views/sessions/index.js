@@ -1,15 +1,16 @@
-// "This project" panel: the Claude sessions working in the project of the active file, their live
-// status, and a prompt box per session that types into that session's own terminal.
+// "Sessions" panel: the Claude sessions working in the project of the active file, with live status.
+// Display only: clicking a session opens its floating terminal window (remote-term), and "New
+// session" launches one in this project. Nothing is ever typed into a session from here.
 const crypto = require("crypto");
 const path = require("path");
 const vscode = require("vscode");
 const { render } = require("./html");
-const { sendPrompt, paneStatus } = require("../../prompt");
+const { paneStatus } = require("../../discovery");
 const { openTerminal } = require("../../term");
 
 const STATUS_MS = 3000;
 
-class PromptView {
+class SessionsView {
   constructor() {
     this.projects = [];
     this.root = null; // project root currently shown
@@ -61,7 +62,11 @@ class PromptView {
   post() {
     if (!this.view) return;
     const p = this.project;
-    const project = p && { label: p.label, root: p.root, sessions: p.sessions.map((s) => ({ name: s.name, pane: s.pane })) };
+    const project = p && {
+      label: p.label,
+      root: p.root,
+      sessions: p.sessions.map((s) => ({ name: s.name, pane: s.pane, tmux: s.tmux, uptime: s.uptime })),
+    };
     this.view.webview.postMessage({ type: "project", project });
     this.pollStatus();
   }
@@ -76,31 +81,19 @@ class PromptView {
     if (!this.view || !this.view.visible || !p) return;
     for (const s of p.sessions.filter((x) => x.pane)) {
       const st = await paneStatus(s.pane);
-      this.view.webview.postMessage({ type: "status", pane: s.pane, ...st });
+      this.view.webview.postMessage({ type: "status", pane: s.pane, busy: st.busy, tail: st.tail.split("\n").slice(-3).join("\n") });
     }
   }
 
-  async onMessage(m) {
+  onMessage(m) {
     if (m.type === "ready") return this.post();
-    if (m.type === "terminal") {
+    if (m.type === "launch") return vscode.commands.executeCommand("remoteSessions.launch", this.root);
+    if (m.type === "open") {
+      // Only sessions of the project on screen are accepted; the webview cannot name arbitrary targets.
       const s = this.project && this.project.sessions.find((x) => x.pane && x.pane === m.pane);
-      return s && openTerminal(s.tmux);
+      if (s && s.tmux) openTerminal(s.tmux);
     }
-    if (m.type !== "send") return;
-    // Only panes of the project on screen are accepted; the webview cannot target arbitrary panes.
-    const p = this.project;
-    const ok = p && p.sessions.some((s) => s.pane && s.pane === m.pane);
-    let error = ok ? null : "session is no longer running in this project";
-    if (ok) {
-      try {
-        await sendPrompt(m.pane, m.text);
-      } catch (err) {
-        error = err.message;
-      }
-    }
-    this.view && this.view.webview.postMessage({ type: "sent", pane: m.pane, error });
-    setTimeout(() => this.pollStatus(), 800);
   }
 }
 
-module.exports = { PromptView };
+module.exports = { SessionsView };
