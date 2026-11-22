@@ -57,7 +57,13 @@ function activate(context) {
     }
   };
 
-  register(context, { refresh, onReveal: select });
+  // Project in context for the tree's "New Session": the selected tree row, else the project the
+  // Sessions panel in that sidebar shows.
+  const currentRoot = () => {
+    const el = view.selection[0];
+    return (el && el.project && el.project.root) || panels[1].root || null;
+  };
+  register(context, { refresh, onReveal: select, currentRoot });
   registerProjects(context, { projects, home });
 
   let timer;

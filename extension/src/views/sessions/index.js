@@ -98,7 +98,7 @@ class SessionsView {
 
   onMessage(m) {
     if (m.type === "ready") return this.post();
-    if (m.type === "launch") return vscode.commands.executeCommand("remoteSessions.launch", this.root);
+    if (m.type === "launch") return this.root && vscode.commands.executeCommand("remoteSessions.launch", this.root);
     if (m.type === "open") {
       // Only sessions of the project on screen are accepted; the webview cannot name arbitrary targets.
       const s = this.project && this.project.sessions.find((x) => x.pane && x.pane === m.pane);

@@ -5,12 +5,12 @@ const { registerProjects } = require("./projects");
 const { registerLaunch } = require("./launch");
 const { openTerminal } = require("../term");
 
-function register(context, { refresh, onReveal }) {
+function register(context, { refresh, onReveal, currentRoot }) {
   const projectOf = (el) => (el && el.project) || null;
   const reg = (id, fn) => context.subscriptions.push(vscode.commands.registerCommand(id, fn));
 
   reg("remoteSessions.refresh", refresh);
-  registerLaunch(context, { refresh });
+  registerLaunch(context, { refresh, currentRoot });
 
   // Tree click: point the "This project" panel at the project without leaving the sidebar.
   reg("remoteSessions.select", (el) => {

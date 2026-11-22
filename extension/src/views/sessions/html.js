@@ -12,7 +12,8 @@ function render(nonce, cspSource, scripts) {
   .label { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   button { color: var(--vscode-button-foreground); background: var(--vscode-button-background); border: 0; border-radius: 2px;
            padding: 2px 8px; cursor: pointer; white-space: nowrap; font-family: inherit; font-size: .9em; }
-  button:hover { background: var(--vscode-button-hoverBackground); }
+  button:hover:not(:disabled) { background: var(--vscode-button-hoverBackground); }
+  button:disabled { opacity: .5; cursor: default; }
   .empty { opacity: .7; padding: 0 10px; }
   .row { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; cursor: pointer; }
   .row:hover { background: var(--vscode-list-hoverBackground); }

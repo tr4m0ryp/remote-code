@@ -44,10 +44,11 @@
     return r;
   }
 
-  function header(label) {
+  function header(label, project) {
     const top = el("div", "top");
     const add = el("button", null, "+ New session");
-    add.title = "Launch a new Claude session";
+    add.disabled = !project;
+    add.title = project ? "Start a new Claude session in " + project.root : "Open a project first";
     add.addEventListener("click", () => vscode.postMessage({ type: "launch" }));
     top.append(el("span", "label", label), add);
     return top;
@@ -57,7 +58,7 @@
     const keep = new Map();
     first = !p || p.root !== shownRoot;
     shownRoot = p ? p.root : null;
-    root.replaceChildren(header(p ? p.label : "Sessions"));
+    root.replaceChildren(header(p ? p.label : "Sessions", p));
     if (!p) return root.append(el("p", "empty", "Open a file in a project to see its sessions."));
     if (!p.sessions.length) root.append(el("p", "empty", "No Claude session is running in this project."));
     for (const s of p.sessions) {
