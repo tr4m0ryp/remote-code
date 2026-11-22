@@ -13,8 +13,9 @@ remote-code fixes that. Host it on a `code.*` subdomain of your instance and eve
 - **code-server**: VS Code running on the instance, served in the browser behind Caddy and the shared login of the instance's manager dashboard.
 - **Remote Sessions extension**: a sidebar listing every running Claude Code session, grouped by project, with branch and changed-file count.
 - **Live workspace**: each project with a running session is kept open as a workspace folder automatically. A session starts, its project appears; it ends, the project leaves.
-- **Prompt a session**: a "Claude Sessions" panel under the Explorer shows the sessions working in the project you have open, their live status and last output, and a prompt box. The prompt is typed into that session's own terminal, so it runs through your Claude harness with its hooks and skills, never through a VS Code assistant.
-- **Terminal windows**: open any session as a floating, macOS-style terminal window over the whole editor (click a session, or "Open terminal" on its card). Several can be open side by side, snapped to screen halves or tiled, and minimised to a dock at the bottom; they come back after a reload.
+- **Sessions bar**: a compact "Sessions" panel under the Explorer lists the sessions working in the project you have open, one row each with an animated Clawd showing its state (working, idle, sleeping), last activity and uptime. It only displays; you talk to a session in its own terminal window.
+- **Terminal windows**: click a session and it opens as a floating, macOS-style terminal window over the whole editor, attached to the session's tmux pane. Several can be open side by side, snapped to screen halves or tiled; the only window control is minimise, which sends a window to the dock at the bottom until you click it back. Windows come back after a reload.
+- **Launch a session**: "+ New session" in the Sessions panel (or the + on the Running sessions tree) picks a directory and a name and starts `claude --remote-control <name>` in a new `rc-<name>` tmux session, then opens its window.
 - **Stripped editor**: VS Code's built-in AI chat, Copilot, cloud sign-in, debuggers, task runners and surplus themes are deleted from the install. What remains is an editor and the sessions.
 
 ## Install
