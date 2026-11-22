@@ -75,8 +75,10 @@ class Controller {
   // Decorated line window: the visible ranges widened by MARGIN lines.
   window(editor) {
     const vr = editor.visibleRanges;
-    if (!vr.length) return [0, MARGIN];
-    return [Math.max(0, vr[0].start.line - MARGIN), vr[vr.length - 1].end.line + MARGIN];
+    if (!vr.length) return [0, 2 * MARGIN];
+    const step = MARGIN / 2; // snapped, so small scrolls keep the same window and skip the update
+    const lo = Math.floor(Math.max(0, vr[0].start.line - MARGIN) / step) * step;
+    return [lo, Math.ceil((vr[vr.length - 1].end.line + MARGIN) / step) * step];
   }
 
   apply(editor, items, style) {
@@ -102,7 +104,7 @@ class Controller {
           },
         },
       });
-      for (const [a, b] of rest) hidden.push({ range: range(a, b) });
+      for (const [a, b] of rest) if (b > a) hidden.push({ range: range(a, b) });
     }
     editor.setDecorations(this.hidden, hidden);
     editor.setDecorations(this.invalid, invalid);
