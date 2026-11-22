@@ -18,6 +18,11 @@ Claude remote-control sessions on this host are working in.
   `client/` the browser overlay, concatenated into `/term/overlay.js`. Restart the unit after
   editing `client/`. Pty attach only for names in the live `tmux list-sessions` set; websocket
   Origin must be in `TERM_ORIGINS`. Tests: `cd term && npm test` (server tests need the unit up).
+- **math-comments/**: the `husimi.math-comments` extension, plain CommonJS; MathJax 3 (`mathjax-full`)
+  bundled by esbuild into `dist/extension.js` (the only file in the vsix). `scan/` lexes comments per
+  languageId and finds math, `render/` TeX to sized SVG data URIs, `decorate/` hides the raw text
+  (`textDecoration: "none; display: none;"`) and injects the SVG as a `before` decoration.
+  Tests: `cd math-comments && npm test`.
 - **deploy/**: unit, config, Caddy block (hash redacted) and `install.sh`, which packages and
   installs the extension and restarts code-server. Run it after every extension change.
 - DNS: Cloudflare zone husimi.ai, token in `~/.config/cloudflare/husimi.env`; it is IPv4-only,
