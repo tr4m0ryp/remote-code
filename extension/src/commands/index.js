@@ -1,5 +1,6 @@
-// Command handlers for the session tree.
+// Command handlers for the session tree; the Projects view and Home tab commands live in projects.js.
 const vscode = require("vscode");
+const { registerProjects } = require("./projects");
 
 function register(context, { refresh, onReveal }) {
   const projectOf = (el) => (el && el.project) || null;
@@ -35,4 +36,4 @@ function register(context, { refresh, onReveal }) {
   });
 }
 
-module.exports = { register };
+module.exports = { register, registerProjects };

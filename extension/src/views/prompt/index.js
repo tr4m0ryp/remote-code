@@ -12,6 +12,7 @@ class PromptView {
   constructor() {
     this.projects = [];
     this.root = null; // project root currently shown
+    this.fallback = null; // project picked by hand that has no running session (absent from projects)
     this.view = null;
     this.timer = null;
   }
@@ -27,7 +28,8 @@ class PromptView {
   }
 
   get project() {
-    return this.projects.find((p) => p.root === this.root) || null;
+    const fb = this.fallback && this.fallback.root === this.root ? this.fallback : null;
+    return this.projects.find((p) => p.root === this.root) || fb;
   }
 
   // Deepest project root that contains the path; null when the path is outside every project.
@@ -51,6 +53,7 @@ class PromptView {
 
   show(project) {
     this.root = project.root;
+    this.fallback = project;
     this.post();
   }
 
