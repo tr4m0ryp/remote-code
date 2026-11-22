@@ -1,0 +1,9 @@
+# Shared login for every hosted project on *.husimi.ai: Caddy asks the manager whether the browser
+# holds a live session (mgr_sso cookie); if not, the manager redirects to its login page with ?next=.
+# Use inside a site block:  import husimi_sso
+(husimi_sso) {
+	forward_auth 127.0.0.1:8790 {
+		uri /auth/verify
+		copy_headers X-Auth-User
+	}
+}
