@@ -8,15 +8,30 @@ live="$data/live.code-workspace"
 
 mkdir -p "$data/User" "$HOME/.config/code-server" "$HOME/.config/systemd/user"
 [ -f "$live" ] || printf '{\n  "folders": [],\n  "settings": {}\n}\n' > "$live"
-[ -f "$data/User/settings.json" ] || cat > "$data/User/settings.json" <<'JSON'
-{
+# Merge the editor defaults into settings.json, keeping anything else the user set.
+# VS Code's own AI chat is switched off: prompts go to the Claude sessions, never a second harness.
+node - "$data/User/settings.json" <<'JS'
+const fs = require("fs"), f = process.argv[2];
+let cur = {}; try { cur = JSON.parse(fs.readFileSync(f, "utf8")); } catch {}
+const defaults = {
   "workbench.colorTheme": "Default Dark Modern",
   "workbench.startupEditor": "none",
   "security.workspace.trust.enabled": false,
   "git.autoRepositoryDetection": "openEditors",
-  "files.watcherExclude": { "**/node_modules/**": true, "**/.venv/**": true, "**/data/**": true }
-}
-JSON
+  "files.watcherExclude": { "**/node_modules/**": true, "**/.venv/**": true, "**/data/**": true },
+};
+const forced = {
+  "chat.disableAIFeatures": true,
+  "chat.commandCenter.enabled": false,
+  "chat.agent.enabled": false,
+  "inlineChat.enabled": false,
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+};
+fs.writeFileSync(f, JSON.stringify({ ...defaults, ...cur, ...forced }, null, 2) + "\n");
+JS
+
+# Remove the bundled Copilot Chat extension so no VS Code-side assistant can run at all.
+rm -rf "$HOME/.local/lib/code-server/lib/vscode/extensions/copilot"
 
 cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
 sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \

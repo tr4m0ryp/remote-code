@@ -2,6 +2,7 @@
 const vscode = require("vscode");
 const { snapshot } = require("./discovery");
 const { SessionTree } = require("./views/tree");
+const { PromptView } = require("./views/prompt");
 const { WorkspaceSync } = require("./workspace/sync");
 const { register } = require("./commands");
 
@@ -11,6 +12,20 @@ function activate(context) {
   const view = vscode.window.createTreeView("remoteSessions.tree", { treeDataProvider: tree, showCollapseAll: true });
   context.subscriptions.push(view);
 
+  // Same panel in two places: under the Explorer while browsing files, and in the sessions sidebar.
+  const prompts = [new PromptView(), new PromptView()];
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider("remoteSessions.prompt", prompts[0], { webviewOptions: { retainContextWhenHidden: true } }),
+    vscode.window.registerWebviewViewProvider("remoteSessions.promptPanel", prompts[1], { webviewOptions: { retainContextWhenHidden: true } })
+  );
+  const activePath = () => {
+    const ed = vscode.window.activeTextEditor;
+    return ed && ed.document.uri.scheme === "file" ? ed.document.uri.fsPath : null;
+  };
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(() => prompts.forEach((v) => v.follow(activePath())))
+  );
+
   let busy = false;
   const refresh = async () => {
     if (busy) return;
@@ -19,6 +34,7 @@ function activate(context) {
       const cfg = vscode.workspace.getConfiguration("remoteSessions");
       const projects = await snapshot({ includeLocal: cfg.get("includeLocal", true) });
       tree.update(projects);
+      prompts.forEach((v) => { v.setProjects(projects); if (!v.root) v.follow(activePath()); });
       const n = projects.reduce((a, p) => a + p.sessions.length, 0);
       view.badge = { value: n, tooltip: `${n} running Claude sessions` };
       if (cfg.get("syncWorkspace", true)) await sync.apply(projects);
@@ -29,7 +45,7 @@ function activate(context) {
     }
   };
 
-  register(context, { refresh });
+  register(context, { refresh, onReveal: (p) => prompts.forEach((v) => v.show(p)) });
 
   let timer;
   const schedule = () => {
