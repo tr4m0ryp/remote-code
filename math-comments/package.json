@@ -13,7 +13,7 @@
     "onStartupFinished"
   ],
   "scripts": {
-    "build": "esbuild src/extension.js --bundle --platform=node --target=node18 --format=cjs --external:vscode --minify --outfile=dist/extension.js",
+    "build": "esbuild src/extension.js --bundle --platform=node --target=node18 --format=cjs --external:vscode --minify --outfile=dist/extension.js --log-level=warning",
     "test": "node --test test/*.test.js",
     "package": "npm run build && vsce package --skip-license --allow-missing-repository"
   },
