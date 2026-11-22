@@ -41,3 +41,9 @@ test("sessions API lists tmux sessions with the expected fields", async () => {
   assert.ok(Array.isArray(sessions));
   for (const s of sessions) for (const k of ["tmux", "name", "project", "root", "busy"]) assert.ok(k in s, k);
 });
+
+test("windows API reports an array of { tmux, min }", async () => {
+  const { windows } = await (await fetch(base + "/term/api/windows")).json();
+  assert.ok(Array.isArray(windows));
+  for (const w of windows) assert.ok(typeof w.tmux === "string" && typeof w.min === "boolean");
+});
