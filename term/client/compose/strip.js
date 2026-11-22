@@ -14,10 +14,14 @@ RT.Compose = class {
     this.line = false;
     this.history = [];
     this.hIndex = -1;
+    // The strip keeps a one-line slot in the window; taller text grows upward over the terminal, so
+    // typing never resizes the pty (which would make Claude redraw).
     this.strip = RT.el("div", "rt-strip");
+    const box = RT.el("div", "rt-strip-box");
     this.input = RT.el("textarea", "rt-input", { rows: "1", spellcheck: "false", autocomplete: "off", "aria-label": "Prompt" });
     this.hint = RT.el("span", "rt-hint");
-    this.strip.append(RT.el("span", "rt-caret", { text: "❯" }), this.input, this.hint);
+    box.append(RT.el("span", "rt-caret", { text: "❯" }), this.input, this.hint);
+    this.strip.append(box);
     this.badge = RT.el("span", "rt-badge");
     this.badge.onclick = () => this.toggle();
     win.f.bar.insertBefore(this.badge, win.f.status);
@@ -77,12 +81,22 @@ RT.Compose = class {
     return e.ctrlKey && e.altKey && !e.metaKey && e.code === "KeyD";
   }
 
-  // Keys while xterm has focus (direct mode): the toggle, and the end of an autocomplete line.
+  // Keys while xterm has focus. Direct mode: everything passes; the toggle and the end of an
+  // autocomplete line are watched. Compose mode (xterm got focus from a text selection): copy keys
+  // copy, a printable key lands in the strip, nothing reaches the pty.
   onTermKey(e) {
     if (e.type !== "keydown") return true;
     if (this.isToggle(e)) {
       e.preventDefault();
       this.toggle();
+      return false;
+    }
+    if (this.mode === "compose") {
+      const copy = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c";
+      if (copy && this.win.term.hasSelection()) navigator.clipboard.writeText(this.win.term.getSelection()).catch(() => {});
+      else if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1) this.input.value += e.key;
+      if (!copy) this.focus();
+      e.preventDefault();
       return false;
     }
     if (this.line && (e.key === "Enter" || e.key === "Escape")) {
@@ -148,9 +162,12 @@ RT.Compose = class {
     this.hint.textContent = m.ok ? "" : "not sent: " + (m.error || "error");
   }
 
+  // Height follows the text (wrapped lines included) up to MAX_LINES, then the textarea scrolls.
   grow() {
-    const lines = Math.min(MAX_LINES, this.input.value.split("\n").length);
-    this.input.rows = lines;
-    this.input.style.overflowY = this.input.value.split("\n").length > MAX_LINES ? "auto" : "hidden";
+    const lh = parseFloat(getComputedStyle(this.input).lineHeight) || 18;
+    this.input.style.height = "0px";
+    const full = this.input.scrollHeight;
+    this.input.style.height = Math.min(full, lh * MAX_LINES) + "px";
+    this.input.style.overflowY = full > lh * MAX_LINES + 1 ? "auto" : "hidden";
   }
 };

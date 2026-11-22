@@ -1,4 +1,5 @@
-// A window's link to its tmux session: pty connection and reattach, and wheel scrolling that drives
+// A window's link to its tmux session: pty connection and reattach, renderer choice, and wheel
+// scrolling that drives
 // tmux history instead of xterm's scrollback (tmux keeps xterm on its alternate screen, where a
 // plain wheel would otherwise turn into arrow keys for Claude).
 const GONE_MS = 8000; // how long a window of an ended session shows its notice before it goes
@@ -13,6 +14,7 @@ RT.connect = function (win) {
       win.notice(null);
     },
     onData: (d) => term.write(d),
+    onPrompt: (m) => win.compose.onPrompt(m),
     onStatus: (s) => win.setStatus(s),
     onEnded: () => win.notice("Detached from " + win.tmux + ".", "Reattach"),
     onGone: () => {
@@ -46,4 +48,17 @@ RT.wheel = function (win, ev) {
     }, 60);
   }
   return false;
+};
+
+// WebGL renderer when the browser offers it (falls back to xterm's DOM renderer; xterm 6 has no
+// canvas renderer). A lost GPU context drops back to DOM as well.
+RT.useWebgl = function (term) {
+  try {
+    const gl = new RT.webgl.WebglAddon();
+    gl.onContextLoss(() => gl.dispose());
+    term.loadAddon(gl);
+    return "webgl";
+  } catch {
+    return "dom";
+  }
 };

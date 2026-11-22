@@ -34,11 +34,13 @@ RT.TermWindow = class {
     this.term.loadAddon(this.fitter);
     this.term.onData((d) => this.pty && this.pty.input(d));
     this.term.attachCustomWheelEventHandler((ev) => RT.wheel(this, ev));
+    this.compose = new RT.Compose(this);
   }
 
   mount(layer) {
     layer.append(this.root);
     this.term.open(this.f.host);
+    this.renderer = RT.useWebgl(this.term);
     this.fit();
     this.ro = new ResizeObserver(RT.debounce(() => this.fit(), 40));
     this.ro.observe(this.f.host);
@@ -112,7 +114,7 @@ RT.TermWindow = class {
 
   focus(withKeyboard = true) {
     RT.wm.raise(this);
-    if (withKeyboard && !this.min) this.term.focus();
+    if (withKeyboard && !this.min) this.compose.focus();
   }
 
   fit() {
