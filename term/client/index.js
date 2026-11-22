@@ -7,6 +7,7 @@ const scripts = [
   "core/dom.js",
   "core/store.js",
   "core/theme.js",
+  "core/debug.js",
   "net/control.js",
   "net/pty.js",
   "wm/layout.js",

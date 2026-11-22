@@ -1,4 +1,5 @@
-// Control websocket: receives the session list and "open" requests, reports this page's windows;
+// Control websocket: receives the session list and "open" requests, reports this page's windows,
+// and measures round-trip time with an app-level ping every 2 s (shown by core/debug.js);
 // reconnects with backoff.
 RT.control = {
   sessions: [],
@@ -45,6 +46,8 @@ RT.control = {
         if (m.type === "sessions" && Array.isArray(m.sessions)) {
           this.sessions = m.sessions;
           this.emit("sessions", m.sessions);
+        } else if (m.type === "pong" && typeof m.t === "number") {
+          RT.latency.add(performance.now() - m.t);
         } else if (m.type === "open" && typeof m.tmux === "string") {
           this.emit("open", m.tmux);
         }
@@ -55,5 +58,6 @@ RT.control = {
       };
     };
     connect();
+    setInterval(() => this.send({ type: "ping", id: Date.now(), t: performance.now() }), 2000);
   },
 };
