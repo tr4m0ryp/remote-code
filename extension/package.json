@@ -3,14 +3,15 @@
   "displayName": "Remote Sessions",
   "description": "Lists the running Claude remote-control sessions on this host and keeps their projects open as workspace folders.",
   "publisher": "husimi",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "vscode": "^1.90.0"
   },
   "main": "./src/extension.js",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onWebviewPanel:remoteSessions.home"
   ],
   "contributes": {
     "viewsContainers": {
@@ -36,10 +37,14 @@
       ],
       "explorer": [
         {
+          "id": "remoteSessions.projects",
+          "name": "Projects",
+          "icon": "media/icon.svg"
+        },
+        {
           "type": "webview",
           "id": "remoteSessions.prompt",
-          "name": "Claude Sessions",
-          "initialSize": 4
+          "name": "Claude Sessions"
         }
       ]
     },
@@ -61,6 +66,25 @@
       {
         "command": "remoteSessions.select",
         "title": "Show Sessions for Project"
+      },
+      {
+        "command": "remoteSessions.projects.click",
+        "title": "Select Project"
+      },
+      {
+        "command": "remoteSessions.projects.open",
+        "title": "Open Project",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "remoteSessions.projects.back",
+        "title": "Back to Projects",
+        "icon": "$(arrow-left)"
+      },
+      {
+        "command": "remoteSessions.home",
+        "title": "Remote Sessions: Home",
+        "icon": "$(home)"
       }
     ],
     "menus": {
@@ -69,6 +93,16 @@
           "command": "remoteSessions.refresh",
           "when": "view == remoteSessions.tree",
           "group": "navigation"
+        },
+        {
+          "command": "remoteSessions.projects.back",
+          "when": "view == remoteSessions.projects && remoteSessions.projectFocused",
+          "group": "navigation@0"
+        },
+        {
+          "command": "remoteSessions.home",
+          "when": "view == remoteSessions.projects && !remoteSessions.projectFocused",
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [
@@ -81,6 +115,25 @@
           "command": "remoteSessions.reveal",
           "when": "view == remoteSessions.tree && viewItem == project",
           "group": "navigation"
+        },
+        {
+          "command": "remoteSessions.projects.open",
+          "when": "view == remoteSessions.projects && viewItem == workspaceProject",
+          "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "remoteSessions.projects.click",
+          "when": "false"
+        },
+        {
+          "command": "remoteSessions.projects.open",
+          "when": "false"
+        },
+        {
+          "command": "remoteSessions.projects.back",
+          "when": "remoteSessions.projectFocused"
         }
       ]
     },
