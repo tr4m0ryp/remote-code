@@ -1,9 +1,5 @@
 // Command handlers for the session tree.
-const os = require("os");
-const path = require("path");
 const vscode = require("vscode");
-
-const LIVE_WORKSPACE = path.join(os.homedir(), ".local/share/code-server/live.code-workspace");
 
 function register(context, { refresh, onReveal }) {
   const projectOf = (el) => (el && el.project) || null;
@@ -17,16 +13,11 @@ function register(context, { refresh, onReveal }) {
     onReveal(p);
     const uri = vscode.Uri.file(p.root);
     if (!vscode.workspace.getWorkspaceFolder(uri)) {
-      vscode.window.showInformationMessage(`${p.label} is not in this workspace. Use "Open Project Alone" or the live workspace.`);
+      vscode.window.showInformationMessage(`${p.label} is not open yet; it joins the workspace on the next scan.`);
       return;
     }
     await vscode.commands.executeCommand("revealInExplorer", uri);
     await vscode.commands.executeCommand("list.expand");
-  });
-
-  reg("remoteSessions.openAlone", async (el) => {
-    const p = projectOf(el);
-    if (p) await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(p.root), { forceNewWindow: false });
   });
 
   // Read-only attach: the viewer sees the Claude session live but cannot type into it or resize it.
@@ -36,8 +27,6 @@ function register(context, { refresh, onReveal }) {
     term.sendText(`exec tmux attach -r -f ignore-size -t '${el.session.tmux.replace(/'/g, "'\\''")}'`);
     term.show();
   });
-
-  reg("remoteSessions.openLive", () => vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(LIVE_WORKSPACE)));
 }
 
-module.exports = { register, LIVE_WORKSPACE };
+module.exports = { register };

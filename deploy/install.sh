@@ -26,12 +26,32 @@ const forced = {
   "chat.agent.enabled": false,
   "inlineChat.enabled": false,
   "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.layoutControl.enabled": false,
+  "workbench.tips.enabled": false,
+  "workbench.welcomePage.walkthroughs.openOnInstall": false,
+  "window.commandCenter": false,
+  "extensions.autoCheckUpdates": false,
+  "extensions.autoUpdate": false,
+  "update.mode": "none",
+  "telemetry.telemetryLevel": "off",
+  "github.gitAuthentication": false,
+  "git.openRepositoryInParentFolders": "never",
 };
 fs.writeFileSync(f, JSON.stringify({ ...defaults, ...cur, ...forced }, null, 2) + "\n");
 JS
 
-# Remove the bundled Copilot Chat extension so no VS Code-side assistant can run at all.
-rm -rf "$HOME/.local/lib/code-server/lib/vscode/extensions/copilot"
+# Strip bundled extensions that do not belong in a session viewer: the AI assistant (prompts go to the
+# Claude sessions only), cloud sign-in and tunnels, debuggers, task runners, and surplus themes.
+# Re-run after every code-server upgrade, which restores them.
+builtin="$HOME/.local/lib/code-server/lib/vscode/extensions"
+for ext in copilot prompt-basics \
+  github github-authentication microsoft-authentication tunnel-forwarding \
+  debug-auto-launch debug-server-ready ms-vscode.js-debug ms-vscode.js-debug-companion ms-vscode.vscode-js-profile-table \
+  npm grunt gulp jake simple-browser extension-editing \
+  theme-abyss theme-kimbie-dark theme-monokai theme-monokai-dimmed theme-quietlight theme-red \
+  theme-solarized-dark theme-solarized-light theme-tomorrow-night-blue; do
+  rm -rf "${builtin:?}/$ext"
+done
 
 cp "$here/deploy/code-server.config.yaml" "$HOME/.config/code-server/config.yaml"
 sed "s|^ExecStart=.*|ExecStart=$HOME/.local/bin/code-server $live|" "$here/deploy/code-server.service" \

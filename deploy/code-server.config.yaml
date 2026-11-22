@@ -4,3 +4,4 @@ cert: false
 disable-telemetry: true
 disable-update-check: true
 disable-workspace-trust: true
+disable-getting-started-override: true
