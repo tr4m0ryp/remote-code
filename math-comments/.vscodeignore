@@ -1,0 +1,5 @@
+# Only the esbuild bundle ships; MathJax is inlined into dist/extension.js.
+**
+!dist/extension.js
+!package.json
+!LICENSE
