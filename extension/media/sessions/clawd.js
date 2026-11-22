@@ -10,7 +10,12 @@
     up: { r1L: "▗▟", r1R: "▄", r2L: " ▜", r2R: "█▘" },
     oneUp: { r1L: " ▐", r1R: "▄", r2L: "▝▜", r2R: "█▘" },
   };
-  const EYES = { open: "▛███▛█", left: "▟███▟█", right: "█▟███▟", closed: "▂███▂█", wink: "▛███▂█" };
+  // Claude Code's own faces are open "▛███▛█", left "▟███▟█", right "█▟███▟", closed "▂███▂█" and
+  // wink "▛███▂█". Drawn as pixels, its glance and closed faces put the gap in the top half of the
+  // head, which reads as a notch rather than an eye; so here a glance moves the open eye one unit
+  // sideways (▜ leaves the bottom-left unit empty) and a closed eye is a one-unit slit ("◡", ours:
+  // the cell filled except its bottom unit).
+  const EYES = { open: "▛███▛█", left: "▜███▜█", right: "█▜███▜", closed: "◡███◡█", wink: "▛███◡█" };
   const BODY = "█████";
   const FEET = { both: " ▝▝   ▝▝ ", left: " ▝▝      ", right: "      ▝▝ " };
   const TURN = [
@@ -47,6 +52,7 @@
       const x = c * 2;
       const y = r * 4;
       if (ch === "▂") return (g[y + 3][x] = g[y + 3][x + 1] = 1);
+      if (ch === "◡") return [0, 1, 2].forEach((dy) => (g[y + dy][x] = g[y + dy][x + 1] = 1));
       const q = QUAD[ch];
       if (!q) return;
       [[0, 0], [1, 0], [0, 2], [1, 2]].forEach(([dx, dy], i) => {
