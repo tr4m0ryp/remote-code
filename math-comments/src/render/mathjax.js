@@ -17,8 +17,7 @@ function init() {
     packages: AllPackages.filter((p) => !skip.has(p)),
     formatError: (_jax, err) => { throw err; },
   });
-  doc = require("mathjax-full/js/mathjax.js").mathjax.document("", { InputJax: tex, OutputJax: new SVG({ fontCache: "local" }) });
-  void mathjax;
+  doc = mathjax.document("", { InputJax: tex, OutputJax: new SVG({ fontCache: "local" }) });
 }
 
 const num = (svg, re) => { const m = re.exec(svg); return m ? parseFloat(m[1]) : 0; };
