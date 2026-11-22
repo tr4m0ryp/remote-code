@@ -43,4 +43,4 @@ function labelProjects(list) {
   }
 }
 
-module.exports = { snapshot };
+module.exports = { snapshot, ...require("./changes"), ...require("./git") };
