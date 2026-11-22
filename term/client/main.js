@@ -33,6 +33,15 @@
     open: (tmux) => RT.wm.open(tmux),
     toggleAll: () => RT.wm.toggleAll(),
     windows: () => [...RT.wm.wins.values()].map((w) => ({ tmux: w.tmux, rect: { ...w.rect }, mode: w.mode, min: w.min, input: w.compose.mode, renderer: w.renderer })),
+    // Visible screen text of a window (the WebGL renderer has no DOM rows to read).
+    screen: (tmux) => {
+      const w = RT.wm.wins.get(tmux);
+      if (!w) return "";
+      const b = w.term.buffer.active;
+      const out = [];
+      for (let y = b.viewportY; y < b.viewportY + w.term.rows; y++) out.push((b.getLine(y) || { translateToString: () => "" }).translateToString(true));
+      return out.join("\n");
+    },
     latency: () => ({ last: RT.latency.last, median: RT.latency.median(), n: RT.latency.samples.length }),
   };
 })();
