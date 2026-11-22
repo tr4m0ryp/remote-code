@@ -1,12 +1,14 @@
 // Keeps one workspace folder per running project. Folders the user added by hand are never touched;
 // a managed folder is dropped only after its project has been absent for GRACE scans, so a session
-// relaunch does not make it flicker out and back.
+// relaunch does not make it flicker out and back. The time each folder was added is kept for the Home page.
 const os = require("os");
 const path = require("path");
 const vscode = require("vscode");
 
 const GRACE = 3;
 const STATE_KEY = "remoteSessions.managed";
+const ADDED_KEY = "remoteSessions.addedAt";
+const ADDED_KEEP_MS = 30 * 86400 * 1000;
 
 class WorkspaceSync {
   constructor(context) {
@@ -17,6 +19,18 @@ class WorkspaceSync {
   excluded(root) {
     const list = vscode.workspace.getConfiguration("remoteSessions").get("excludeRoots", []);
     return list.some((e) => path.resolve(e.replace(/^~(?=$|\/)/, os.homedir())) === root);
+  }
+
+  // { root: ms since epoch } for folders this sync added in the last 30 days.
+  addedAt() {
+    return this.context.globalState.get(ADDED_KEY, {});
+  }
+
+  async recordAdded(roots) {
+    const now = Date.now();
+    const next = Object.fromEntries(Object.entries(this.addedAt()).filter(([, at]) => now - at < ADDED_KEEP_MS));
+    for (const root of roots) next[root] = now;
+    await this.context.globalState.update(ADDED_KEY, next);
   }
 
   async apply(projects) {
@@ -40,6 +54,7 @@ class WorkspaceSync {
     for (const root of added) managed.add(root);
     for (const f of current) if (!keep.includes(f)) { managed.delete(f.uri.fsPath); this.missing.delete(f.uri.fsPath); }
     await this.context.globalState.update(STATE_KEY, [...managed]);
+    if (added.length) await this.recordAdded(added);
 
     // Changing the first folder restarts the extension host, so kept folders hold their order and
     // new ones append; the first slot is rewritten only when that folder itself is removed.
