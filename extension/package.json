@@ -5,44 +5,111 @@
   "publisher": "husimi",
   "version": "0.1.0",
   "license": "SEE LICENSE IN LICENSE",
-  "engines": { "vscode": "^1.90.0" },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
   "main": "./src/extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
-        { "id": "remoteSessions", "title": "Remote Sessions", "icon": "media/icon.svg" }
+        {
+          "id": "remoteSessions",
+          "title": "Remote Sessions",
+          "icon": "media/icon.svg"
+        }
       ]
     },
     "views": {
       "remoteSessions": [
-        { "id": "remoteSessions.tree", "name": "Running sessions" }
+        {
+          "id": "remoteSessions.tree",
+          "name": "Running sessions"
+        }
       ]
     },
     "commands": [
-      { "command": "remoteSessions.refresh", "title": "Refresh", "icon": "$(refresh)" },
-      { "command": "remoteSessions.reveal", "title": "Show in Explorer" },
-      { "command": "remoteSessions.openAlone", "title": "Open Project Alone", "icon": "$(link-external)" },
-      { "command": "remoteSessions.watch", "title": "Watch Session (read-only terminal)", "icon": "$(eye)" },
-      { "command": "remoteSessions.openLive", "title": "Remote Sessions: Open Live Workspace" }
+      {
+        "command": "remoteSessions.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "remoteSessions.reveal",
+        "title": "Show in Explorer"
+      },
+      {
+        "command": "remoteSessions.openAlone",
+        "title": "Open Project Alone",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "remoteSessions.watch",
+        "title": "Watch Session (read-only terminal)",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "remoteSessions.openLive",
+        "title": "Remote Sessions: Open Live Workspace"
+      }
     ],
     "menus": {
       "view/title": [
-        { "command": "remoteSessions.refresh", "when": "view == remoteSessions.tree", "group": "navigation" }
+        {
+          "command": "remoteSessions.refresh",
+          "when": "view == remoteSessions.tree",
+          "group": "navigation"
+        }
       ],
       "view/item/context": [
-        { "command": "remoteSessions.openAlone", "when": "view == remoteSessions.tree && viewItem == project", "group": "inline" },
-        { "command": "remoteSessions.watch", "when": "view == remoteSessions.tree && viewItem == session", "group": "inline" }
+        {
+          "command": "remoteSessions.openAlone",
+          "when": "view == remoteSessions.tree && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "remoteSessions.watch",
+          "when": "view == remoteSessions.tree && viewItem == session",
+          "group": "inline"
+        }
       ]
     },
     "configuration": {
       "title": "Remote Sessions",
       "properties": {
-        "remoteSessions.pollSeconds": { "type": "number", "default": 15, "description": "How often to rescan running sessions." },
-        "remoteSessions.includeLocal": { "type": "boolean", "default": true, "description": "Also list Claude sessions started without --remote-control." },
-        "remoteSessions.syncWorkspace": { "type": "boolean", "default": true, "description": "Keep one workspace folder per running project." },
-        "remoteSessions.excludeRoots": { "type": "array", "items": { "type": "string" }, "default": ["/", "~"], "description": "Directories never added as workspace folders." }
+        "remoteSessions.pollSeconds": {
+          "type": "number",
+          "default": 15,
+          "description": "How often to rescan running sessions."
+        },
+        "remoteSessions.includeLocal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Also list Claude sessions started without --remote-control."
+        },
+        "remoteSessions.syncWorkspace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep one workspace folder per running project."
+        },
+        "remoteSessions.excludeRoots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "/",
+            "~"
+          ],
+          "description": "Directories never added as workspace folders."
+        }
       }
     }
-  }
+  },
+  "files": [
+    "src/**",
+    "media/**"
+  ]
 }
