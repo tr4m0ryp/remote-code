@@ -12,6 +12,7 @@ const VENDOR = {
   "/term/vendor/xterm.js": [path.join(mods, "@xterm/xterm/lib/xterm.js"), "application/javascript"],
   "/term/vendor/xterm.css": [path.join(mods, "@xterm/xterm/css/xterm.css"), "text/css"],
   "/term/vendor/addon-fit.js": [path.join(mods, "@xterm/addon-fit/lib/addon-fit.js"), "application/javascript"],
+  "/term/vendor/addon-webgl.js": [path.join(mods, "@xterm/addon-webgl/lib/addon-webgl.js"), "application/javascript"],
 };
 
 // Runs a UMD bundle against a private module object and returns its exports.
@@ -25,7 +26,8 @@ function bundleJs() {
     "(function(){\"use strict\";",
     "if (window.__remoteTerm) return; window.__remoteTerm = true;",
     `var RT = { xterm: ${umd(VENDOR["/term/vendor/xterm.js"][0])},`,
-    `  fit: ${umd(VENDOR["/term/vendor/addon-fit.js"][0])} };`,
+    `  fit: ${umd(VENDOR["/term/vendor/addon-fit.js"][0])},`,
+    `  webgl: ${umd(VENDOR["/term/vendor/addon-webgl.js"][0])} };`,
     ...client.scripts.map((f) => `// ---- ${path.relative(path.dirname(client.root), f)}\n(function(){\n${read(f)}\n})();`),
     "})();",
   ];

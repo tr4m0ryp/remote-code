@@ -1,6 +1,8 @@
-// One pty websocket per window: output goes to the terminal; input, resize and scroll go to the
-// server. Reconnects after network drops; reports "ended" (tmux client exited) and "gone" (no such
-// session) to the window. Close codes 4000/4404 come from term/src/ws/pty.js.
+// One pty websocket per window: binary output frames go straight to the terminal; keystrokes go out
+// at once as binary frames; resize, scroll and compose-mode prompts as JSON text frames. Reconnects
+// after network drops; reports "ended" (tmux client exited) and "gone" (no such session) to the
+// window. Close codes 4000/4404 come from term/src/ws/pty.js.
+const encoder = new TextEncoder();
 RT.PtyConn = class {
   constructor(tmux, size, handlers) {
     this.tmux = tmux;
@@ -14,12 +16,19 @@ RT.PtyConn = class {
   open(size) {
     const q = new URLSearchParams({ session: this.tmux, cols: size.cols, rows: size.rows });
     const ws = (this.ws = new WebSocket(RT.wsUrl("/term/ws/pty?" + q)));
+    ws.binaryType = "arraybuffer";
     ws.onopen = () => {
       this.tries = 0;
       this.h.onOpen(this.opened);
       this.opened = true;
     };
-    ws.onmessage = (e) => this.h.onData(e.data);
+    ws.onmessage = (e) => {
+      if (typeof e.data !== "string") return this.h.onData(new Uint8Array(e.data));
+      try {
+        const m = JSON.parse(e.data);
+        if (m.t === "prompt" && this.h.onPrompt) this.h.onPrompt(m);
+      } catch {}
+    };
     ws.onclose = (e) => {
       if (this.closed || ws !== this.ws) return;
       if (e.code === 4404) return this.h.onGone();
@@ -35,7 +44,11 @@ RT.PtyConn = class {
   }
 
   input(d) {
-    this.send({ t: "i", d });
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(encoder.encode(d));
+  }
+
+  prompt(text, id) {
+    this.send({ t: "prompt", text, id });
   }
 
   resize(c, r) {
