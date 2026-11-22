@@ -19,6 +19,15 @@
   // and focus it when minimised. They reach every editor tab; only a visible one acts.
   RT.control.on("open", (tmux) => document.visibilityState === "visible" && RT.wm.open(tmux));
   RT.wm.restoreAll();
+  // Saved windows are placed before the workbench has drawn its status bar; once it exists, snapped
+  // windows are fitted again to the real work area.
+  let tries = 0;
+  const settle = setInterval(() => {
+    if (document.querySelector(".part.statusbar") || ++tries > 60) {
+      clearInterval(settle);
+      RT.wm.wins.forEach((w) => w.relayout());
+    }
+  }, 250);
   RT.control.start();
   window.remoteTerm = {
     open: (tmux) => RT.wm.open(tmux),
