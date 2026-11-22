@@ -43,7 +43,7 @@ test("math in Python docstrings and block comments of other languages", () => {
 test("negatives stay text", () => {
   const cases = [
     "# cd $HOME and run", "# costs $5 and $10", "# $ x $", "# a$b", "# $HOME/$USER",
-    "# ${HOME}/x/${USER}", "# echo $a$b", "# price $5$ no", "# escaped \\$x\\$",
+    "# ${HOME}/x/${USER}", "# echo $a$b", "# pay $5,$6 now", "# escaped \\$x\\$",
   ];
   for (const c of cases) assert.deepStrictEqual(texs(c, "shellscript"), [], c);
 });
