@@ -49,7 +49,9 @@ function sessionItem(s, p) {
   item.tooltip = `${s.remote ? "remote-control" : "local"} session, pid ${s.pid}\n${p.root}`;
   item.iconPath = new vscode.ThemeIcon(s.remote ? "broadcast" : "terminal");
   item.contextValue = s.tmux ? "session" : "session-notmux";
-  item.command = { command: "remoteSessions.select", title: "Show Sessions", arguments: [{ kind: "project", project: p }] };
+  item.command = s.tmux
+    ? { command: "remoteSessions.watch", title: "Open Terminal Window", arguments: [{ kind: "session", session: s, project: p }] }
+    : { command: "remoteSessions.select", title: "Show Sessions", arguments: [{ kind: "project", project: p }] };
   return item;
 }
 

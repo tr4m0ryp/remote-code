@@ -24,6 +24,8 @@ function render(nonce, cspSource) {
   button { color: var(--vscode-button-foreground); background: var(--vscode-button-background); border: 0;
            padding: 4px 12px; cursor: pointer; }
   button:disabled { opacity: .5; cursor: default; }
+  button.secondary { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground);
+                     padding: 2px 8px; font-size: .85em; white-space: nowrap; }
   .msg { font-size: .8em; margin-top: 4px; }
 </style></head>
 <body><div id="root"><p class="empty">Open a file in a project to see its sessions.</p></div>
@@ -37,6 +39,11 @@ function card(s) {
   const c = el("div", "card"); c.dataset.pane = s.pane || "";
   const head = el("div", "head");
   head.append(el("span", "name", s.name), el("span", "state", s.pane ? "checking" : "no tmux pane"));
+  if (s.pane) {
+    const open = el("button", "secondary", "Open terminal"); open.title = "Open this session as a floating terminal window";
+    open.addEventListener("click", () => vscode.postMessage({ type: "terminal", pane: s.pane }));
+    head.append(open);
+  }
   c.append(head, el("pre"));
   if (!s.pane) { c.querySelector("pre").textContent = "This session does not run in tmux, so prompts cannot be sent to it."; return c; }
   const ta = el("textarea"); ta.placeholder = "Prompt for " + s.name; ta.value = drafts[s.pane] || "";
@@ -65,7 +72,7 @@ window.addEventListener("message", ({ data }) => {
     pre.textContent = data.tail; if (atEnd) pre.scrollTop = pre.scrollHeight;
   } else if (data.type === "sent") {
     const c = root.querySelector('.card[data-pane="' + CSS.escape(data.pane) + '"]'); if (!c) return;
-    c.querySelector("button").disabled = false;
+    c.querySelector(".row button").disabled = false;
     c.querySelector(".msg").textContent = data.error ? "Failed: " + data.error : "Sent to the session.";
     if (!data.error) { c.querySelector("textarea").value = ""; delete drafts[data.pane]; vscode.setState(drafts); }
   }

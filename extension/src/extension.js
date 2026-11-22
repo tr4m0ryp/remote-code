@@ -75,6 +75,8 @@ function activate(context) {
   );
   refresh();
   applyFirstRunLayout(context);
+  // VS Code's AI features are removed, so the right-hand (Chat) side bar is always empty: close it.
+  Promise.resolve(vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar")).catch(() => {});
 }
 
 function deactivate() {}

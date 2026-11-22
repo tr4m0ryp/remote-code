@@ -1,6 +1,7 @@
 // Command handlers for the session tree; the Projects view and Home tab commands live in projects.js.
 const vscode = require("vscode");
 const { registerProjects } = require("./projects");
+const { openTerminal } = require("../term");
 
 function register(context, { refresh, onReveal }) {
   const projectOf = (el) => (el && el.project) || null;
@@ -27,12 +28,12 @@ function register(context, { refresh, onReveal }) {
     await vscode.commands.executeCommand("list.expand");
   });
 
-  // Read-only attach: the viewer sees the Claude session live but cannot type into it or resize it.
+  // Session row click or inline button: the session opens as a floating terminal window over the
+  // editor (remote-term overlay), and the "This project" panel follows its project.
   reg("remoteSessions.watch", (el) => {
     if (!el || !el.session || !el.session.tmux) return;
-    const term = vscode.window.createTerminal({ name: `watch ${el.session.tmux}`, cwd: el.project.root });
-    term.sendText(`exec tmux attach -r -f ignore-size -t '${el.session.tmux.replace(/'/g, "'\\''")}'`);
-    term.show();
+    if (el.project) onReveal(el.project);
+    openTerminal(el.session.tmux);
   });
 }
 

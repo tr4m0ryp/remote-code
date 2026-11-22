@@ -5,6 +5,7 @@ const path = require("path");
 const vscode = require("vscode");
 const { render } = require("./html");
 const { sendPrompt, paneStatus } = require("../../prompt");
+const { openTerminal } = require("../../term");
 
 const STATUS_MS = 3000;
 
@@ -81,6 +82,10 @@ class PromptView {
 
   async onMessage(m) {
     if (m.type === "ready") return this.post();
+    if (m.type === "terminal") {
+      const s = this.project && this.project.sessions.find((x) => x.pane && x.pane === m.pane);
+      return s && openTerminal(s.tmux);
+    }
     if (m.type !== "send") return;
     // Only panes of the project on screen are accepted; the webview cannot target arbitrary panes.
     const p = this.project;
