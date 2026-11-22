@@ -1,20 +1,15 @@
-// Title-bar dragging with edge snapping: the left/right screen edge snaps to a half, the top edge
-// maximises. Dragging a maximised or snapped window first restores its size under the pointer.
-// Double-clicking the title bar toggles maximise, as on macOS.
+// Title-bar dragging with edge snapping: the left/right screen edge snaps the window to that half.
+// Dragging a snapped window first restores its normal size under the pointer.
 const EDGE = 6;
 
 function snapAt(ev) {
   if (ev.clientX <= EDGE) return "left";
   if (ev.clientX >= window.innerWidth - EDGE) return "right";
-  if (ev.clientY <= EDGE) return "max";
   return null;
 }
 
 RT.attachDrag = function (win) {
   const bar = win.f.bar;
-  bar.addEventListener("dblclick", (e) => {
-    if (!e.target.closest(".rt-lights")) win.toggleMax();
-  });
   bar.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || e.target.closest(".rt-lights")) return;
     e.preventDefault();
@@ -52,8 +47,7 @@ RT.attachDrag = function (win) {
       RT.wm.shield(false);
       RT.wm.preview(null);
       win.root.classList.remove("rt-dragging");
-      if (snap === "max") win.maximise();
-      else if (snap) win.snap(snap);
+      if (snap) win.snap(snap);
       RT.wm.persist();
     };
     bar.addEventListener("pointermove", move);

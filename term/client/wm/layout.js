@@ -1,13 +1,8 @@
-// Window geometry: halves for edge snapping, the full area for maximise, a grid for Tile, a cascade
-// for new windows, and clamping so a title bar always stays reachable.
+// Window geometry: halves for edge snapping, a grid for Tile, a cascade for new windows, and
+// clamping so a title bar always stays reachable.
 const GAP = 8;
 
 RT.layout = {
-  full() {
-    const a = RT.area();
-    return { x: a.x, y: a.y, w: a.w, h: a.h };
-  },
-
   half(side) {
     const a = RT.area();
     const w = Math.floor(a.w / 2);

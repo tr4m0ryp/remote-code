@@ -27,10 +27,13 @@ function sessionFor(pid, parents, panes) {
   return null;
 }
 
-// Claude shows "esc to interrupt" in its footer while it is working.
+// Claude shows "esc to interrupt" while it works and "Waiting for N background agents to finish"
+// while its subagents run (same rule as extension/src/discovery/pane.js).
+const BUSY = /esc to interrupt|waiting for \d+ background (?:agents?|tasks?)/i;
+
 async function paneBusy(pane) {
   const out = await run("tmux", ["capture-pane", "-p", "-J", "-t", pane, "-S", "-14"]);
-  return /esc to interrupt/i.test(out.replace(/\s+$/, "").split("\n").slice(-12).join("\n"));
+  return BUSY.test(out.replace(/\s+$/, "").split("\n").slice(-12).join("\n"));
 }
 
 // Scrolls the session's active pane through tmux copy-mode; lines < 0 scrolls up into history.

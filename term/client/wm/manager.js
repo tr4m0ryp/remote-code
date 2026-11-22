@@ -1,5 +1,5 @@
 // Window manager: registry keyed by tmux session, z-order and focus, snap preview, drag shield,
-// Tile, minimise-all, and persistence of every open window's geometry.
+// Tile, minimise-all, and persistence of every window's geometry.
 RT.wm = {
   wins: new Map(),
   z: 10,
@@ -36,7 +36,8 @@ RT.wm = {
     return win;
   },
 
-  close(win) {
+  // Only for windows whose tmux session ended; the UI itself never closes a window.
+  remove(win) {
     this.wins.delete(win.tmux);
     win.dispose();
     RT.dock.render();
@@ -51,7 +52,7 @@ RT.wm = {
   preview(kind) {
     const el = this.previewEl;
     if (!kind) return el.classList.remove("show");
-    const r = kind === "max" ? RT.layout.full() : RT.layout.half(kind);
+    const r = RT.layout.half(kind);
     Object.assign(el.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px" });
     el.classList.add("show");
   },

@@ -1,4 +1,4 @@
-// Edge and corner resizing. Resizing a maximised or snapped window frees it into a normal one; the
+// Edge and corner resizing. Resizing a snapped window frees it into a normal one; the
 // terminal refits through the window's ResizeObserver.
 RT.attachResize = function (win) {
   for (const handle of win.root.querySelectorAll(".rt-h")) {

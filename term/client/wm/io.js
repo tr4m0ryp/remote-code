@@ -1,6 +1,8 @@
 // A window's link to its tmux session: pty connection and reattach, and wheel scrolling that drives
 // tmux history instead of xterm's scrollback (tmux keeps xterm on its alternate screen, where a
 // plain wheel would otherwise turn into arrow keys for Claude).
+const GONE_MS = 8000; // how long a window of an ended session shows its notice before it goes
+
 RT.connect = function (win) {
   const term = win.term;
   win.pty = new RT.PtyConn(win.tmux, { cols: term.cols, rows: term.rows }, {
@@ -17,6 +19,7 @@ RT.connect = function (win) {
       win.dead = true;
       win.notice("Session " + win.tmux + " is no longer running.", null);
       RT.wm.persist();
+      setTimeout(() => RT.wm.wins.get(win.tmux) === win && RT.wm.remove(win), GONE_MS);
     },
   });
 };

@@ -1,5 +1,5 @@
 // One floating terminal window bound to a tmux session: xterm instance, pty connection, geometry
-// (a normal rect plus maximised/snapped modes) and minimise state.
+// (a normal rect plus left/right snapped modes) and minimise state.
 RT.TermWindow = class {
   constructor(session, state) {
     this.tmux = session.tmux;
@@ -7,18 +7,15 @@ RT.TermWindow = class {
     this.f = RT.frame(this.label);
     this.root = this.f.root;
     this.root.dataset.tmux = this.tmux;
-    this.mode = "normal"; // normal | max | left | right
-    this.prev = null; // normal rect remembered while maximised or snapped
+    this.mode = "normal"; // normal | left | right
+    this.prev = null; // normal rect remembered while snapped
     this.min = false;
     this.dead = false;
     this.wheel = 0;
     this.place(RT.layout.fit(state.rect || RT.layout.cascade(RT.wm.count())));
-    if (state.mode === "max") this.maximise();
-    else if (state.mode === "left" || state.mode === "right") this.snap(state.mode);
+    if (state.mode === "left" || state.mode === "right") this.snap(state.mode);
 
-    this.f.close.onclick = () => RT.wm.close(this);
     this.f.min.onclick = () => this.minimise();
-    this.f.max.onclick = () => this.toggleMax();
     this.f.noteBtn.onclick = () => RT.reattach(this);
     this.root.addEventListener("pointerdown", () => this.focus(), true);
     RT.attachDrag(this);
@@ -81,29 +78,17 @@ RT.TermWindow = class {
     if (mode === "normal") this.prev = null;
     else if (this.mode === "normal") this.prev = { ...this.rect };
     this.mode = mode;
-    this.root.classList.toggle("rt-max", mode === "max");
     this.root.classList.toggle("rt-snapped", mode === "left" || mode === "right");
     this.place(rect);
-  }
-
-  maximise() {
-    this.setMode("max", RT.layout.full());
   }
 
   snap(side) {
     this.setMode(side, RT.layout.half(side));
   }
 
-  toggleMax() {
-    if (this.mode === "max") this.setMode("normal", this.normalRect());
-    else this.maximise();
-    RT.wm.persist();
-  }
-
-  // Keeps the window inside a resized viewport; maximised and snapped windows follow the new size.
+  // Keeps the window inside a resized viewport; snapped windows follow the new size.
   relayout() {
-    if (this.mode === "max") this.place(RT.layout.full());
-    else if (this.mode !== "normal") this.place(RT.layout.half(this.mode));
+    if (this.mode !== "normal") this.place(RT.layout.half(this.mode));
     else this.place(RT.layout.fit(this.rect));
   }
 
